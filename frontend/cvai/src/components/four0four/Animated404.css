@@ -1,0 +1,392 @@
+/* Animated404.css */
+.error-404-container {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Gradient Background Animation */
+.gradient-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  opacity: 0.7;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Stars */
+.stars-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle linear infinite;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+@keyframes twinkle {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100vh);
+  }
+}
+
+/* Content Wrapper */
+.content-wrapper {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 2rem;
+  max-width: 800px;
+}
+
+/* 404 Code */
+.error-code {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.digit {
+  font-size: 12rem;
+  font-weight: 900;
+  color: white;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.digit:first-child {
+  animation-delay: 0s;
+}
+
+.digit:last-child {
+  animation-delay: 0.5s;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+/* Astronaut */
+.astronaut-container {
+  width: 200px;
+  height: 200px;
+  margin: 0 2rem;
+  position: relative;
+}
+
+.astronaut {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.1s ease-out;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.flame {
+  animation: flicker 0.2s ease-in-out infinite alternate;
+}
+
+@keyframes flicker {
+  0% {
+    transform: scaleY(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scaleY(1.2);
+    opacity: 1;
+  }
+}
+
+/* Error Message */
+.error-message {
+  margin-bottom: 3rem;
+  color: white;
+}
+
+.message-title {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  animation: slideInUp 0.8s ease-out;
+}
+
+.message-subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+  animation: slideInUp 0.8s ease-out 0.2s both;
+}
+
+.message-description {
+  font-size: 1.1rem;
+  opacity: 0.8;
+  max-width: 600px;
+  margin: 0 auto;
+  animation: slideInUp 0.8s ease-out 0.4s both;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: slideInUp 0.8s ease-out 0.6s both;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: white;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-3px);
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+/* Floating Elements */
+.floating-elements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.planet {
+  position: absolute;
+  border-radius: 50%;
+  animation: orbit linear infinite;
+}
+
+.planet-1 {
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a);
+  top: 20%;
+  left: 10%;
+  animation-duration: 20s;
+}
+
+.planet-2 {
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle at 30% 30%, #4ecdc4, #0b7285);
+  top: 60%;
+  right: 15%;
+  animation-duration: 25s;
+  animation-direction: reverse;
+}
+
+.planet-3 {
+  width: 30px;
+  height: 30px;
+  background: radial-gradient(circle at 30% 30%, #ffe66d, #fcc419);
+  bottom: 20%;
+  left: 20%;
+  animation-duration: 30s;
+}
+
+@keyframes orbit {
+  from {
+    transform: rotate(0deg) translateX(100px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(100px) rotate(-360deg);
+  }
+}
+
+.satellite {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: white;
+  top: 40%;
+  right: 30%;
+  animation: satellite 15s linear infinite;
+}
+
+.satellite::before,
+.satellite::after {
+  content: "";
+  position: absolute;
+  background: #4a90e2;
+  height: 3px;
+  width: 40px;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%);
+}
+
+.satellite::before {
+  transform: translateY(-50%) translateX(-50px);
+}
+
+.satellite::after {
+  transform: translateY(-50%) translateX(10px);
+}
+
+@keyframes satellite {
+  from {
+    transform: rotate(0deg) translateX(150px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(150px) rotate(-360deg);
+  }
+}
+
+/* Interactive Hint */
+.interactive-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  opacity: 0.7;
+  font-size: 0.9rem;
+  animation: fadeIn 2s ease-out 2s both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.7;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .digit {
+    font-size: 6rem;
+  }
+
+  .astronaut-container {
+    width: 120px;
+    height: 120px;
+    margin: 0 1rem;
+  }
+
+  .message-title {
+    font-size: 2rem;
+  }
+
+  .message-subtitle {
+    font-size: 1.2rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 200px;
+    justify-content: center;
+  }
+}
