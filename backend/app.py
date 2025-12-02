@@ -22,11 +22,15 @@ db = None
 database_url = os.getenv('DATABASE_URL')
 db_error = None
 
+print(f"🔍 Starting app with DATABASE_URL: {database_url[:50] if database_url else 'None'}...")
+
 try:
     if database_url:
+        print("📦 Importing SQLAlchemy...")
         from flask_sqlalchemy import SQLAlchemy
         from datetime import datetime
         
+        print("🔧 Configuring SQLAlchemy...")
         # Fix potential Railway DATABASE_URL format
         if database_url.startswith('postgres://'):
             database_url = database_url.replace('postgres://', 'postgresql://', 1)
@@ -34,20 +38,28 @@ try:
         app.config['SQLALCHEMY_DATABASE_URI'] = database_url
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         
-        db = SQLAlchemy(app)
+        print("🏗️ Initializing SQLAlchemy...")
+        db = SQLAlchemy()
+        db.init_app(app)
         
-        # Define models
-        class User(db.Model):
-            id = db.Column(db.Integer, primary_key=True)
-            email = db.Column(db.String(120), unique=True, nullable=False)
-            password_hash = db.Column(db.String(128))
-            created_at = db.Column(db.DateTime, default=datetime.utcnow)
+        print("📋 Defining models...")
+        # Define models inside app context
+        with app.app_context():
+            class User(db.Model):
+                id = db.Column(db.Integer, primary_key=True)
+                email = db.Column(db.String(120), unique=True, nullable=False)
+                password_hash = db.Column(db.String(128))
+                created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-        class Interview(db.Model):
-            id = db.Column(db.Integer, primary_key=True)
-            user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-            title = db.Column(db.String(200), nullable=False)
-            created_at = db.Column(db.DateTime, default=datetime.utcnow)
+            class Interview(db.Model):
+                id = db.Column(db.Integer, primary_key=True)
+                user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+                title = db.Column(db.String(200), nullable=False)
+                created_at = db.Column(db.DateTime, default=datetime.utcnow)
+            
+            # Store models globally
+            app.User = User
+            app.Interview = Interview
         
         print("✅ SQLAlchemy initialized successfully")
     else:
@@ -55,8 +67,10 @@ try:
         print(f"❌ {db_error}")
         
 except Exception as e:
-    db_error = str(e)
+    db_error = f"SQLAlchemy initialization error: {str(e)}"
     print(f"⚠️ Database initialization failed: {e}")
+    import traceback
+    traceback.print_exc()
 
 # Routes
 @app.route('/')
@@ -77,7 +91,9 @@ def debug_env():
         "DATABASE_URL_type": type(database_url).__name__,
         "DATABASE_URL_length": len(database_url) if database_url else 0,
         "DATABASE_URL_starts_with": database_url[:30] if database_url else None,
-        "all_env_count": len(os.environ)
+        "db_object_exists": db is not None,
+        "db_error": db_error,
+        "flask_sqlalchemy_installed": True
     })
 
 @app.route('/health')
@@ -90,11 +106,12 @@ def create_tables():
         return jsonify({"error": "Database not initialized", "reason": db_error}), 500
     
     try:
-        db.create_all()
-        return jsonify({
-            "status": "success",
-            "message": "All tables created successfully"
-        })
+        with app.app_context():
+            db.create_all()
+            return jsonify({
+                "status": "success",
+                "message": "All tables created successfully"
+            })
     except Exception as e:
         return jsonify({
             "status": "error",
@@ -107,15 +124,16 @@ def test_db():
         return jsonify({"error": "Database not initialized", "reason": db_error}), 500
     
     try:
-        with db.engine.connect() as connection:
-            result = connection.execute(db.text('SELECT version()'))
+        with app.app_context():
+            # Simple connection test
+            result = db.session.execute(db.text('SELECT version()'))
             version = result.fetchone()[0]
-        
-        return jsonify({
-            "status": "database_connected",
-            "message": "PostgreSQL connection successful",
-            "postgres_version": version[:100]
-        })
+            
+            return jsonify({
+                "status": "database_connected",
+                "message": "PostgreSQL connection successful",
+                "postgres_version": version[:100]
+            })
     except Exception as e:
         return jsonify({
             "status": "database_error", 
