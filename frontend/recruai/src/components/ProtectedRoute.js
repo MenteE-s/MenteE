@@ -1,59 +1,67 @@
 // src/components/ProtectedRoute.js
-import { Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 
-// ProtectedRoute now performs a lightweight token validation with the backend
-// If a token exists we call /api/auth/me to verify it and refresh the stored role.
-export default function ProtectedRoute({ children }) {
-  const [checking, setChecking] = useState(true);
-  const [ok, setOk] = useState(false);
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://mentee-production-e517.up.railway.app';
+const API_VERSION = process.env.REACT_APP_API_VERSION || 'v1';
+
+const ProtectedRoute = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
+    const checkAuth = async () => {
       try {
-        // rely on HttpOnly cookies; include credentials so browser sends the cookie
-        const res = await fetch("/api/auth/me", { credentials: "include" });
-        // debug log
-        // eslint-disable-next-line no-console
-        console.log("/api/auth/me status:", res.status);
-        if (!res.ok) {
-          // clear any local flags and let the user sign in again
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("isAuthenticated");
-          localStorage.removeItem("authRole");
-          if (!cancelled) setOk(false);
-        } else {
-          const data = await res.json();
-          if (!cancelled) {
-            // mark authenticated in localStorage
-            localStorage.setItem("isAuthenticated", "true");
-            if (data.user && data.user.role) {
-              localStorage.setItem("authRole", data.user.role);
-            }
-            setOk(true);
-          }
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setIsAuthenticated(false);
+          setLoading(false);
+          return;
         }
-      } catch (err) {
-        // network error - be conservative: treat as not authenticated
-        // eslint-disable-next-line no-console
-        console.error("/api/auth/me network error:", err);
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("isAuthenticated");
-        localStorage.removeItem("authRole");
-        if (!cancelled) setOk(false);
-      } finally {
-        if (!cancelled) setChecking(false);
-      }
-    })();
 
-    return () => {
-      cancelled = true;
+        const response = await fetch(`${API_BASE_URL}/api/${API_VERSION}/auth/me`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        console.log(`${API_BASE_URL}/api/${API_VERSION}/auth/me status:`, response.status);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Auth check successful:', data);
+          setIsAuthenticated(true);
+        } else {
+          console.log('Auth check failed, removing token');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.log(`${API_BASE_URL}/api/${API_VERSION}/auth/me network error:`, error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
     };
+
+    checkAuth();
   }, []);
 
-  if (checking) return null; // or a loader component
-  if (!ok) return <Navigate to="/signin" replace />;
-  return children;
-}
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  return isAuthenticated ? children : <Navigate to="/signin" replace />;
+};
+
+export default ProtectedRoute;

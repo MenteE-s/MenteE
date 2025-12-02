@@ -3,6 +3,11 @@ import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "../components/ui/ToastContext";
 import { authAPI } from "../utils/auth";
 
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL ||
+  "https://mentee-production-e517.up.railway.app";
+const API_VERSION = process.env.REACT_APP_API_VERSION || "v1";
+
 export default function Register() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -69,61 +74,36 @@ export default function Register() {
     }
 
     try {
-      const res = await fetch("/api/auth/register", {
+      const apiUrl = `${API_BASE_URL}/api/${API_VERSION}/auth/register`;
+      console.log("Calling registration API:", apiUrl);
+
+      const response = await fetch(apiUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        // include role and optional organization name for organizations
-        body: JSON.stringify({
-          email,
-          name,
-          password,
-          role,
-          organization_name:
-            role === "organization" ? organizationName : undefined,
-        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        const msg = data.error || "Registration failed";
-        setError(msg);
-        showToast({
-          message: msg,
-          type: "error",
-          position: "side",
-          duration: 3500,
-        });
-        setLoading(false);
-        return;
+
+      console.log("Registration response status:", response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Registration failed");
       }
-      // registration success — if backend returned token, sign in immediately
-      if (data.access_token) {
-        // server set cookie; set local flags and role (server-verified)
-        localStorage.setItem("isAuthenticated", "true");
-        if (data.user && data.user.role) {
-          localStorage.setItem("authRole", data.user.role);
-        } else {
-          localStorage.setItem("authRole", role);
-        }
-        showToast({
-          message: "Account created — signed in",
-          type: "success",
-          position: "side",
-          duration: 2400,
-        });
-        navigate("/dashboard", { replace: true });
-      } else {
-        // otherwise go to sign-in page so user can authenticate
-        showToast({
-          message: "Registration complete — please sign in",
-          type: "success",
-          position: "side",
-          duration: 2400,
-        });
-        navigate("/signin", { replace: true });
+
+      const result = await response.json();
+      console.log("Registration successful:", result);
+
+      // Store token and redirect
+      if (result.access_token) {
+        localStorage.setItem("token", result.access_token);
+        localStorage.setItem("user", JSON.stringify(result.user));
+        navigate("/dashboard");
       }
-    } catch (err) {
-      setError("Network error");
+    } catch (error) {
+      console.error("Registration error:", error);
+      setError(error.message || "Registration failed");
     } finally {
       setLoading(false);
     }
