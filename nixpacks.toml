@@ -1,8 +1,8 @@
 [phases.setup]
-nixPkgs = ["...", "postgresql"]
+aptPkgs = ["postgresql-dev", "libpq-dev", "gcc", "musl-dev"]
 
 [phases.install]
-cmds = ["cd backend && pip install -r requirements.txt"]
+cmds = ["pip install -r requirements.txt"]
 
 [start]
-cmd = "cd backend && gunicorn app:app --bind 0.0.0.0:$PORT"
+cmd = "gunicorn app:app --bind 0.0.0.0:$PORT"
