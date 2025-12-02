@@ -35,7 +35,10 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-slate-700 mb-2"
+              >
                 Email
               </label>
               <input
@@ -51,7 +54,10 @@ export default function Login() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-slate-700 mb-2"
+              >
                 Password
               </label>
               <input
@@ -76,7 +82,10 @@ export default function Login() {
               </a>
             </div>
 
-            <button type="submit" className="w-full bg-linear-to-r from-primary-600 to-accent-700 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all">
+            <button
+              type="submit"
+              className="w-full bg-linear-to-r from-primary-600 to-accent-700 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all"
+            >
               Sign In
             </button>
           </form>
@@ -102,7 +111,10 @@ export default function Login() {
 
           <p className="text-center text-slate-600 mt-6">
             Don't have an account?{" "}
-            <Link to="/signup" className="text-primary-500 hover:text-primary-600">
+            <Link
+              to="/signup"
+              className="text-primary-500 hover:text-primary-600"
+            >
               Sign up
             </Link>
           </p>

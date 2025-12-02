@@ -29,7 +29,9 @@ export default function Signup() {
       <div className="max-w-md w-full">
         <div className="bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-slate-900">Create Account</h1>
+            <h1 className="text-3xl font-bold text-slate-900">
+              Create Account
+            </h1>
             <p className="text-slate-600">
               Join us today and start creating amazing presentations
             </p>
@@ -37,7 +39,10 @@ export default function Signup() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-slate-700 mb-2"
+              >
                 Full Name
               </label>
               <input
@@ -53,7 +58,10 @@ export default function Signup() {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-slate-700 mb-2"
+              >
                 Email
               </label>
               <input
@@ -69,7 +77,10 @@ export default function Signup() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-slate-700 mb-2"
+              >
                 Password
               </label>
               <input
@@ -85,7 +96,10 @@ export default function Signup() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-slate-700 mb-2"
+              >
                 Confirm Password
               </label>
               <input
@@ -105,18 +119,27 @@ export default function Signup() {
                 <input type="checkbox" className="mr-2 mt-1" required />
                 <span className="text-sm text-slate-600">
                   I agree to the{" "}
-                  <a href="#" className="text-primary-500 hover:text-primary-600">
+                  <a
+                    href="#"
+                    className="text-primary-500 hover:text-primary-600"
+                  >
                     Terms of Service
                   </a>{" "}
                   and{" "}
-                  <a href="#" className="text-primary-500 hover:text-primary-600">
+                  <a
+                    href="#"
+                    className="text-primary-500 hover:text-primary-600"
+                  >
                     Privacy Policy
                   </a>
                 </span>
               </label>
             </div>
 
-            <button type="submit" className="w-full bg-linear-to-r from-primary-600 to-accent-700 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all">
+            <button
+              type="submit"
+              className="w-full bg-linear-to-r from-primary-600 to-accent-700 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all"
+            >
               Create Account
             </button>
           </form>
@@ -142,7 +165,10 @@ export default function Signup() {
 
           <p className="text-center text-slate-600 mt-6">
             Already have an account?{" "}
-            <Link to="/login" className="text-primary-500 hover:text-primary-600">
+            <Link
+              to="/login"
+              className="text-primary-500 hover:text-primary-600"
+            >
               Sign in
             </Link>
           </p>
