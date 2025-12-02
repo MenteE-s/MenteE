@@ -1,2 +1,6 @@
 TODO.md
 .env
+
+node_modules/
+memory-bank
+.github

@@ -74,12 +74,6 @@ const Sidebar = ({ isOpen, onToggle }) => {
       path: "/dashboard",
       icon: <LayoutDashboard size={20} />,
     },
-    // {
-    {
-      name: "Editor",
-      path: "/editor",
-      icon: <Edit size={20} />,
-    },
     // Profile management
     {
       name: "My Profile",

@@ -13,13 +13,11 @@ import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
 import Login from "./components/login/Login";
 import DashboardPage from "./components/dashboard/Dashboard";
-import ProfileComplete from "./components/profile/profilecomplete";
-import ShareableProfile from "./components/profile/ShareableProfile";
 import Signup from "./components/signup/Signup";
 import HomePage from "./components/Homepage/Homepage";
+import Profile from "./components/profile/Profile";
 import ToasterProvider from "./components/ToasterProvider";
 // --- Added import for CVEditorPage ---
-import CVEditorPage from "./components/Editor/cvEditor";
 // --- Added import for AuthLayout ---
 import AuthLayout from "./components/Layout/AuthLayout";
 // --- Added import for Analytics ---
@@ -77,9 +75,7 @@ function App() {
         }
 
         try {
-          console.log(
-            "🔄 Validating token with /api/cvai/profile (namespaced)..."
-          );
+          console.log("🔄 Validating token with /api/cvai/me (namespaced)...");
           console.log(
             "📤 Sending Authorization header:",
             `Bearer ${token.substring(0, 20)}...`
@@ -87,7 +83,7 @@ function App() {
 
           // Verify token is still valid by calling a protected endpoint
           // API_BASE already includes /api/cvai; remove extra /api to avoid 404
-          const response = await fetch(`${API_BASE}/profile`, {
+          const response = await fetch(`${API_BASE}/me`, {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -170,7 +166,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Signup />} />
           {/* --- Public route for shared profiles --- */}
-          <Route path="/share/:profileId" element={<ShareableProfile />} />
+          {/* <Route path="/share/:profileId" element={<ShareableProfile />} /> */}
 
           {/* --- Protected Routes with Sidebar --- */}
           <Route
@@ -182,11 +178,9 @@ function App() {
             }
           >
             <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="profile" element={<ProfileComplete />} />
-            {/* --- Added Route for CV Editor --- */}
-            <Route path="editor" element={<CVEditorPage />} />
+            <Route path="profile" element={<Profile />} />
             {/* --- Added route for editing with profileId ---*/}
-            <Route path="editor/:profileId" element={<CVEditorPage />} />
+            {/* <Route path="editor/:profileId" element={<CVEditorPage />} /> */}
             {/* --- Added Route for Analytics --- */}
             <Route
               path="analytics"
