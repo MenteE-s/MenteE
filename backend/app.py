@@ -30,7 +30,7 @@ except Exception as e:
     print(f"⚠️ Database initialization failed: {e}")
     print("📋 App will continue without database features")
 
-# Basic routes (same as before)
+# Basic routes
 @app.route('/')
 def root():
     return jsonify({
@@ -58,10 +58,14 @@ def test_db():
     
     try:
         # Test database connection
-        db.engine.execute('SELECT 1')
+        with db.engine.connect() as connection:
+            result = connection.execute(db.text('SELECT version()'))
+            version = result.fetchone()[0]
+        
         return jsonify({
             "status": "database_connected",
-            "message": "PostgreSQL connection successful via SQLAlchemy"
+            "message": "PostgreSQL connection successful via SQLAlchemy",
+            "postgres_version": version[:100]
         })
     except Exception as e:
         return jsonify({
