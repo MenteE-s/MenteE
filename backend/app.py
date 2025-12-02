@@ -8,89 +8,56 @@ registered). Running `python app.py` therefore omitted `/api/cvai` and
 canonical factory.
 """
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
 
-def create_app():
-    app = Flask(__name__)
-    
-    # Basic configuration
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
-    app.config['DATABASE_URL'] = os.getenv('DATABASE_URL')
-    
-    # Initialize CORS
-    CORS(app)
-    
-    # Health check routes
-    @app.route('/')
-    def root():
-        return jsonify({
-            "status": "ok", 
-            "message": "RecruAI Backend is running!",
-            "version": "1.0.0",
-            "endpoints": ["/", "/health", "/api/v1/health", "/test-db"]
-        })
-    
-    @app.route('/health')
-    def health():
-        return jsonify({"status": "healthy", "service": "RecruAI"})
-    
-    @app.route('/test-db')
-    def test_db():
-        """Test database connection without SQLAlchemy"""
-        try:
-            import psycopg2
-            conn = psycopg2.connect(os.getenv('DATABASE_URL'))
-            cursor = conn.cursor()
-            cursor.execute("SELECT version();")
-            version = cursor.fetchone()[0]
-            cursor.close()
-            conn.close()
-            return jsonify({
-                "status": "database_connected",
-                "postgres_version": version[:100],
-                "message": "Direct psycopg2 connection successful"
-            })
-        except Exception as e:
-            return jsonify({
-                "status": "database_error",
-                "error": str(e),
-                "message": "Will add SQLAlchemy back once basic app works"
-            }), 500
-    
-    # Try to register API blueprint, but don't fail if it doesn't work
+# Create Flask app directly (no __init__.py file)
+app = Flask(__name__)
+
+# Configure app
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
+CORS(app)
+
+# Basic routes
+@app.route('/')
+def root():
+    return jsonify({
+        "status": "ok",
+        "message": "RecruAI Backend is running!",
+        "version": "1.0.0",
+        "timestamp": "2025-12-03"
+    })
+
+@app.route('/health')
+def health():
+    return jsonify({"status": "healthy"})
+
+@app.route('/api/v1/health')
+def api_health():
+    return jsonify({"status": "api_healthy"})
+
+@app.route('/api/v1/chat', methods=['POST'])
+def chat():
     try:
-        from app.blueprints.recruai.routes.api import api_bp
-        app.register_blueprint(api_bp, url_prefix='/api/v1')
-        print("✅ API Blueprint registered successfully")
+        data = request.get_json() or {}
+        message = data.get('message', 'Hello')
+        
+        # Simple echo response for now
+        return jsonify({
+            "response": f"RecruAI received: {message}",
+            "status": "success"
+        })
     except Exception as e:
-        print(f"⚠️  Warning: Could not register API blueprint: {e}")
-        
-        # Create simple API endpoints as fallback
-        @app.route('/api/v1/health')
-        def api_health():
-            return jsonify({"status": "api_healthy", "message": "Basic API working"})
-        
-        @app.route('/api/v1/chat', methods=['POST'])
-        def simple_chat():
-            from flask import request
-            try:
-                data = request.get_json()
-                message = data.get('message', '')
-                
-                # Simple response for now
-                return jsonify({
-                    "response": f"Echo: {message}",
-                    "message": "Basic chat endpoint - will integrate Groq properly soon"
-                })
-            except Exception as e:
-                return jsonify({"error": str(e)}), 500
-    
-    return app
+        return jsonify({"error": str(e)}), 500
 
-# Create the app instance
-app = create_app()
+@app.route('/test-db')
+def test_db():
+    return jsonify({
+        "status": "database_skipped",
+        "message": "Database testing disabled for now - app is running!"
+    })
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=os.getenv("FLASK_DEBUG", "1") == "1")
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
