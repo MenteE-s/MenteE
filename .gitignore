@@ -4,3 +4,13 @@ TODO.md
 node_modules/
 memory-bank
 .github
+uploads
+venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.idea/
+.vscode/

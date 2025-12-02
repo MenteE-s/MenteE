@@ -74,6 +74,10 @@ def create_app(config_object: object | None = None):
 	def uploaded_file(filename):  # type: ignore
 		return send_from_directory(os.path.join(os.path.dirname(here), 'uploads'), filename)
 
+	@app.route('/uploads/organization_images/<path:filename>')
+	def organization_uploaded_file(filename):  # type: ignore
+		return send_from_directory(os.path.join(os.path.dirname(here), 'app', 'services', 'recruai', 'uploads', 'organization_images'), filename)
+
 	app.config.setdefault("SESSION_COOKIE_HTTPONLY", True)
 	app.config.setdefault("SESSION_COOKIE_SECURE", os.getenv("SESSION_COOKIE_SECURE", "0") == "1")
 
