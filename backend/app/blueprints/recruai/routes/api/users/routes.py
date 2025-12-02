@@ -1,4 +1,5 @@
 from flask import request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from .. import api_bp
 from extensions import db
@@ -97,3 +98,35 @@ def get_user_full_profile(user_id):
     }
 
     return jsonify(profile_data), 200
+
+
+@api_bp.route("/profile", methods=["PUT"])
+@jwt_required()
+def update_user_profile():
+    """Update user's personal information."""
+    user_id = get_jwt_identity()
+    user = User.query.get_or_404(user_id)
+    payload = request.get_json(silent=True) or {}
+    
+    # Update allowed fields
+    if "name" in payload:
+        user.name = payload["name"]
+    if "phone" in payload:
+        user.phone = payload["phone"]
+    if "location" in payload:
+        user.location = payload["location"]
+    if "timezone" in payload:
+        # Validate timezone if provided
+        tz = payload["timezone"]
+        if tz and not is_valid_timezone(tz):
+            return jsonify({"error": f"Invalid timezone: {tz}"}), 400
+        user.timezone = tz
+    if "linkedin_url" in payload:
+        user.linkedin_url = payload["linkedin_url"]
+    if "github_url" in payload:
+        user.github_url = payload["github_url"]
+    if "website_url" in payload:
+        user.website_url = payload["website_url"]
+    
+    db.session.commit()
+    return jsonify({"user": user.to_dict()}), 200

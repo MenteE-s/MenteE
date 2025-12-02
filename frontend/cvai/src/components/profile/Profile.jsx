@@ -1739,6 +1739,33 @@ export default function Profile() {
     }
   };
 
+  const savePersonalInfo = async (personalData) => {
+    setSaving(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${API_BASE}/profile`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(personalData),
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        setUserData(updatedUser.user);
+        setEditingItem(null);
+      } else {
+        setError("Failed to save personal information");
+      }
+    } catch (error) {
+      console.error("Error saving personal info:", error);
+      setError("Network error. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleProfilePictureUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -1904,6 +1931,95 @@ export default function Profile() {
           <p className="text-gray-700 leading-relaxed">
             {profileData.about.summary || "Tell us about yourself..."}
           </p>
+        </Card>
+
+        {/* Personal Information Section */}
+        <Card className="lg:col-span-2">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-800 flex items-center">
+              <FiUser className="mr-2" />
+              Personal Information
+            </h3>
+            <button
+              onClick={() =>
+                setEditingItem({ type: "personalInfo", data: userData })
+              }
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <FiEdit2 size={16} />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {userData?.name && (
+              <div>
+                <p className="text-sm text-gray-500">Full Name</p>
+                <p className="text-gray-900 font-medium">{userData.name}</p>
+              </div>
+            )}
+            {userData?.email && (
+              <div>
+                <p className="text-sm text-gray-500">Email</p>
+                <p className="text-gray-900 font-medium">{userData.email}</p>
+              </div>
+            )}
+            {userData?.phone && (
+              <div>
+                <p className="text-sm text-gray-500">Phone</p>
+                <p className="text-gray-900 font-medium">{userData.phone}</p>
+              </div>
+            )}
+            {userData?.location && (
+              <div>
+                <p className="text-sm text-gray-500">Location</p>
+                <p className="text-gray-900 font-medium">{userData.location}</p>
+              </div>
+            )}
+            {userData?.timezone && (
+              <div>
+                <p className="text-sm text-gray-500">Timezone</p>
+                <p className="text-gray-900 font-medium">{userData.timezone}</p>
+              </div>
+            )}
+            {(userData?.linkedin_url ||
+              userData?.github_url ||
+              userData?.website_url) && (
+              <div className="md:col-span-2">
+                <p className="text-sm text-gray-500 mb-2">Links</p>
+                <div className="flex flex-wrap gap-4">
+                  {userData.linkedin_url && (
+                    <a
+                      href={userData.linkedin_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-700 text-sm"
+                    >
+                      LinkedIn
+                    </a>
+                  )}
+                  {userData.github_url && (
+                    <a
+                      href={userData.github_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-700 text-sm"
+                    >
+                      GitHub
+                    </a>
+                  )}
+                  {userData.website_url && (
+                    <a
+                      href={userData.website_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-700 text-sm"
+                    >
+                      Website
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </Card>
 
         {/* Experience Section */}
@@ -2947,16 +3063,18 @@ export default function Profile() {
       </div>
 
       {/* Item Modal */}
-      {editingItem && editingItem.type !== "about" && (
-        <ItemModal
-          isOpen={true}
-          onClose={() => setEditingItem(null)}
-          itemType={editingItem.type}
-          itemData={editingItem.data}
-          onSave={saveItem}
-          saving={saving}
-        />
-      )}
+      {editingItem &&
+        editingItem.type !== "about" &&
+        editingItem.type !== "personalInfo" && (
+          <ItemModal
+            isOpen={true}
+            onClose={() => setEditingItem(null)}
+            itemType={editingItem.type}
+            itemData={editingItem.data}
+            onSave={saveItem}
+            saving={saving}
+          />
+        )}
 
       {/* About Modal */}
       {editingItem && editingItem.type === "about" && (
@@ -2977,6 +3095,116 @@ export default function Profile() {
               rows={6}
               required
             />
+            <div className="flex gap-3 justify-end mt-6">
+              <button
+                type="button"
+                onClick={() => setEditingItem(null)}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : (
+                  "Save"
+                )}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* Personal Information Modal */}
+      {editingItem && editingItem.type === "personalInfo" && (
+        <Modal isOpen={true} onClose={() => setEditingItem(null)}>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
+            Edit Personal Information
+          </h2>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const personalData = {
+                name: formData.get("name"),
+                email: editingItem.data?.email,
+                phone: formData.get("phone"),
+                location: formData.get("location"),
+                timezone: formData.get("timezone"),
+                linkedin_url: formData.get("linkedin_url"),
+                github_url: formData.get("github_url"),
+                website_url: formData.get("website_url"),
+              };
+              savePersonalInfo(personalData);
+            }}
+          >
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Full Name"
+                  defaultValue={editingItem.data?.name || ""}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email Address"
+                  defaultValue={editingItem.data?.email || ""}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  disabled
+                />
+                <input
+                  type="tel"
+                  name="phone"
+                  placeholder="Phone Number"
+                  defaultValue={editingItem.data?.phone || ""}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Location"
+                  defaultValue={editingItem.data?.location || ""}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  type="text"
+                  name="timezone"
+                  placeholder="Timezone (e.g., Asia/Karachi)"
+                  defaultValue={editingItem.data?.timezone || ""}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <input
+                  type="url"
+                  name="linkedin_url"
+                  placeholder="LinkedIn URL"
+                  defaultValue={editingItem.data?.linkedin_url || ""}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  type="url"
+                  name="github_url"
+                  placeholder="GitHub URL"
+                  defaultValue={editingItem.data?.github_url || ""}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  type="url"
+                  name="website_url"
+                  placeholder="Personal Website URL"
+                  defaultValue={editingItem.data?.website_url || ""}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
             <div className="flex gap-3 justify-end mt-6">
               <button
                 type="button"
