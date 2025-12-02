@@ -14,3 +14,6 @@ __pycache__/
 .Python
 .idea/
 .vscode/
+
+DEPLOYMENT_CHECKLIST.md
+DEPLOYMENT_GUIDE.md
