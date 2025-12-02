@@ -12,6 +12,117 @@ import {
   FiCheckCircle,
 } from "react-icons/fi";
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API_VERSION = process.env.REACT_APP_API_VERSION || "v1";
+
+// API endpoints
+export const API_ENDPOINTS = {
+  BASE: API_BASE_URL,
+  AUTH: {
+    REGISTER: `${API_BASE_URL}/api/${API_VERSION}/auth/register`,
+    LOGIN: `${API_BASE_URL}/api/${API_VERSION}/auth/login`,
+    ME: `${API_BASE_URL}/api/${API_VERSION}/auth/me`,
+  },
+  INTERVIEWS: {
+    LIST: `${API_BASE_URL}/api/${API_VERSION}/interviews`,
+    CREATE: `${API_BASE_URL}/api/${API_VERSION}/interviews`,
+  },
+  CHAT: `${API_BASE_URL}/api/${API_VERSION}/chat`,
+};
+
+// Auth functions
+export const authAPI = {
+  register: async (email, password) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.AUTH.REGISTER, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Registration failed");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Registration error:", error);
+      throw error;
+    }
+  },
+
+  login: async (email, password) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Login failed");
+      }
+
+      const data = await response.json();
+
+      // Store token in localStorage
+      if (data.access_token) {
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
+    }
+  },
+
+  getCurrentUser: async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found");
+
+      const response = await fetch(API_ENDPOINTS.AUTH.ME, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to get user");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Get user error:", error);
+      throw error;
+    }
+  },
+
+  logout: () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+  },
+
+  getToken: () => {
+    return localStorage.getItem("token");
+  },
+
+  isAuthenticated: () => {
+    const token = localStorage.getItem("token");
+    return !!token;
+  },
+};
+
 // Get the backend URL for API calls and uploaded files
 export function getBackendUrl() {
   // In development, use localhost:5000
@@ -201,3 +312,5 @@ export function getSidebarItems(role, plan) {
   }
   return [];
 }
+
+export default authAPI;

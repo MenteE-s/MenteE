@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "../components/ui/ToastContext";
+import { authAPI } from '../utils/auth';
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -45,78 +46,11 @@ export default function SignIn() {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        // do not send client-side role — server determines role from the user record
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        const msg = data.error || "Sign in failed";
-        setError(msg);
-        // show side toast for errors
-        showToast({
-          message: msg,
-          type: "error",
-          position: "side",
-          duration: 3500,
-        });
-        setLoading(false);
-        return;
-      }
-      // If the user selected a role in the UI that doesn't match the server role,
-      // don't block sign-in — prefer the server-verified role. Show a warning
-      // so the user knows which dashboard they'll land on.
-      if (data.user && data.user.role && role && data.user.role !== role) {
-        const msg = `Account role mismatch: this email is registered as '${data.user.role}'. Signing in as '${data.user.role}'.`;
-        showToast({
-          message: msg,
-          type: "warning",
-          position: "center",
-          duration: 4500,
-        });
-        // override client role with server role
-        setRole(data.user.role);
-      }
-      // store token, mark authenticated and redirect to dashboard
-      // With cookie-based auth the server sets an HttpOnly cookie. We keep
-      // returning the token in the JSON for backward compatibility but do not
-      // store it in localStorage.
-      // mark auth for frontend-only checks (will be refreshed by /api/auth/me)
-      localStorage.setItem("isAuthenticated", "true");
-      // use server-verified role from response (do not trust the client-side role selector)
-      if (data.user && data.user.role) {
-        localStorage.setItem("authRole", data.user.role);
-      }
-      // show success toast
-      showToast({
-        message: "Signed in",
-        type: "success",
-        position: "side",
-        duration: 2200,
-      });
-      // prefer SPA navigation but fall back to full reload if SPA route doesn't take
-      navigate("/dashboard", { replace: true });
-      // debug helper: log server response
-      // eslint-disable-next-line no-console
-      console.log("login response", data);
-      if (typeof window !== "undefined") {
-        // small delay: if SPA navigation didn't change the path (protected route may redirect),
-        // force a hard navigation to help surface errors in the network tab.
-        setTimeout(() => {
-          if (window.location.pathname === "/signin") {
-            // eslint-disable-next-line no-console
-            console.warn(
-              "SPA navigation to /dashboard didn't take effect — forcing full reload"
-            );
-            window.location.assign("/dashboard");
-          }
-        }, 600);
-      }
-    } catch (err) {
-      setError("Network error");
+      const result = await authAPI.login(email, password);
+      console.log('Login successful:', result);
+      navigate('/dashboard');
+    } catch (error) {
+      setError(error.message || 'Login failed');
     } finally {
       setLoading(false);
     }
