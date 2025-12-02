@@ -8,6 +8,7 @@ package directory `app/` and the former top-level `app.py` module, so
 import os
 from dotenv import load_dotenv
 from flask import Flask, jsonify, send_from_directory
+from flask_cors import CORS
 
 from config import Config
 from extensions import db, migrate, jwt
@@ -52,6 +53,9 @@ def create_app(config_object: object | None = None):
 	app = Flask(__name__)
 	app.config.from_object(config_object or Config)
 
+	# Initialize CORS
+	CORS(app)
+
 	# Initialize extensions
 	db.init_app(app)
 	migrate.init_app(app, db)
@@ -66,7 +70,6 @@ def create_app(config_object: object | None = None):
 
 	# CORS for frontend dev
 	try:
-		from flask_cors import CORS  # type: ignore
 		# Support multiple dev frontends: allow comma-separated FRONTEND_ORIGIN list
 		origins_raw = os.getenv("FRONTEND_ORIGIN", "http://localhost:3000,http://localhost:3001")
 		origins = [o.strip() for o in origins_raw.split(',') if o.strip()]
