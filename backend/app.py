@@ -17,20 +17,40 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
 CORS(app)
 
-# Initialize database connection safely
+# Initialize database safely
 db = None
 try:
     from flask_sqlalchemy import SQLAlchemy
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    from datetime import datetime
     
-    db = SQLAlchemy(app)
-    print("✅ SQLAlchemy initialized successfully")
+    database_url = os.getenv('DATABASE_URL')
+    if database_url:
+        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        
+        db = SQLAlchemy(app)
+        
+        # Define models
+        class User(db.Model):
+            id = db.Column(db.Integer, primary_key=True)
+            email = db.Column(db.String(120), unique=True, nullable=False)
+            password_hash = db.Column(db.String(128))
+            created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+        class Interview(db.Model):
+            id = db.Column(db.Integer, primary_key=True)
+            user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+            title = db.Column(db.String(200), nullable=False)
+            created_at = db.Column(db.DateTime, default=datetime.utcnow)
+        
+        print("✅ SQLAlchemy initialized successfully")
+    else:
+        print("❌ DATABASE_URL not found")
+        
 except Exception as e:
     print(f"⚠️ Database initialization failed: {e}")
-    print("📋 App will continue without database features")
 
-# Basic routes
+# Routes
 @app.route('/')
 def root():
     return jsonify({
@@ -44,17 +64,27 @@ def root():
 def health():
     return jsonify({"status": "healthy"})
 
-@app.route('/api/v1/health')
-def api_health():
-    return jsonify({"status": "api_healthy"})
+@app.route('/create-tables')
+def create_tables():
+    if not db:
+        return jsonify({"error": "Database not initialized"}), 500
+    
+    try:
+        db.create_all()
+        return jsonify({
+            "status": "success",
+            "message": "All tables created successfully"
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "error": str(e)
+        }), 500
 
 @app.route('/test-db')
 def test_db():
     if not db:
-        return jsonify({
-            "status": "database_disabled",
-            "message": "Database not initialized"
-        }), 500
+        return jsonify({"error": "Database not initialized"}), 500
     
     try:
         # Test database connection
@@ -64,7 +94,7 @@ def test_db():
         
         return jsonify({
             "status": "database_connected",
-            "message": "PostgreSQL connection successful via SQLAlchemy",
+            "message": "PostgreSQL connection successful",
             "postgres_version": version[:100]
         })
     except Exception as e:
@@ -72,6 +102,10 @@ def test_db():
             "status": "database_error", 
             "error": str(e)
         }), 500
+
+@app.route('/api/v1/health')
+def api_health():
+    return jsonify({"status": "api_healthy"})
 
 @app.route('/api/v1/chat', methods=['POST'])
 def chat():
