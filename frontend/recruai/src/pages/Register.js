@@ -3,10 +3,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "../components/ui/ToastContext";
 import { authAPI } from "../utils/auth";
 
-const API_BASE_URL =
-  process.env.REACT_APP_API_URL ||
-  "https://mentee-production-e517.up.railway.app";
-const API_VERSION = process.env.REACT_APP_API_VERSION || "v1";
+// HARD-CODED for testing - replace environment variables
+const API_BASE_URL = "https://mentee-production-e517.up.railway.app";
+const API_VERSION = "v1";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -75,7 +74,7 @@ export default function Register() {
 
     try {
       const apiUrl = `${API_BASE_URL}/api/${API_VERSION}/auth/register`;
-      console.log("Calling registration API:", apiUrl);
+      console.log("🔥 CALLING API:", apiUrl);
 
       const response = await fetch(apiUrl, {
         method: "POST",
@@ -85,7 +84,7 @@ export default function Register() {
         body: JSON.stringify({ email, password }),
       });
 
-      console.log("Registration response status:", response.status);
+      console.log("✅ Response status:", response.status);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -93,7 +92,7 @@ export default function Register() {
       }
 
       const result = await response.json();
-      console.log("Registration successful:", result);
+      console.log("🎉 Registration successful:", result);
 
       // Store token and redirect
       if (result.access_token) {
@@ -102,7 +101,7 @@ export default function Register() {
         navigate("/dashboard");
       }
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error("❌ Registration error:", error);
       setError(error.message || "Registration failed");
     } finally {
       setLoading(false);
@@ -110,222 +109,104 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center relative overflow-hidden">
-      {/* Background animated layers (matching Hero) */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-6 pointer-events-none"></div>
-      <div className="absolute inset-0 bg-gradient-to-r from-primary-400/20 via-accent-400/20 to-primary-400/20 bg-300% animate-gradient pointer-events-none"></div>
-      <div
-        className="absolute w-96 h-96 bg-gradient-radial from-primary-200/30 to-transparent rounded-full pointer-events-none transition-all duration-300 blur-3xl"
-        style={{ left: mousePosition.x - 192, top: mousePosition.y - 192 }}
-      ></div>
-
-      <div className="max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 shadow-lg rounded overflow-hidden relative z-10">
-        {/* Left panel - message */}
-        <div className="hidden md:flex flex-col justify-center p-10 bg-gradient-to-br from-green-600 to-teal-500 text-white">
-          <h3 className="text-3xl font-bold mb-4">Create your account</h3>
-          <p className="text-sm opacity-90">
-            Join RecruAI and start posting jobs, screening candidates with AI,
-            and collaborating with your team.
-          </p>
-          <div className="mt-6">
-            <ul className="space-y-2 text-sm">
-              <li>• Unlimited job posts (trial)</li>
-              <li>• AI-powered candidate scoring</li>
-              <li>• Advanced analytics and reporting</li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Right panel - form */}
-        <div className="bg-white p-8">
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => navigate("/signin")}
-              className="text-sm text-gray-500 hover:underline"
-              type="button"
-            >
-              ← Back
-            </button>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Create your account
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Or{" "}
             <Link
               to="/signin"
-              className="text-sm text-blue-600 hover:underline"
+              className="font-medium text-indigo-600 hover:text-indigo-500"
             >
-              Sign in
+              sign in to your existing account
             </Link>
-          </div>
-          <h2 className="text-2xl font-bold mb-2">Create an account</h2>
-          <div className="flex items-center gap-3 mb-6 p-1 bg-gray-100 rounded-lg">
-            <button
-              type="button"
-              onClick={() => setRole("individual")}
-              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                role === "individual"
-                  ? "bg-white text-green-700 shadow-sm border border-green-200"
-                  : "text-gray-600 hover:text-gray-800"
-              }`}
-            >
-              👤 Individual
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole("organization")}
-              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                role === "organization"
-                  ? "bg-white text-green-700 shadow-sm border border-green-200"
-                  : "text-gray-600 hover:text-gray-800"
-              }`}
-            >
-              🏢 Organization
-            </button>
-          </div>
-          {error && <div className="text-red-600 mb-2">{error}</div>}
+          </p>
+        </div>
 
-          <form onSubmit={submit}>
-            <label className="block mb-2">
-              <span className="text-sm">Email</span>
+        <form className="mt-8 space-y-6" onSubmit={submit}>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Email address
+              </label>
               <input
-                className="mt-1 block w-full border px-3 py-2 rounded"
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                type="email"
-                required
+                className="mt-1 block w-full border border-gray-300 px-3 py-2 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter your email"
               />
-            </label>
-            {role === "organization" && (
-              <label className="block mb-2">
-                <span className="text-sm">Organization name</span>
-                <input
-                  className="mt-1 block w-full border px-3 py-2 rounded"
-                  value={organizationName}
-                  onChange={(e) => setOrganizationName(e.target.value)}
-                />
-              </label>
-            )}
-            <label className="block mb-2">
-              <span className="text-sm">Name (optional)</span>
-              <input
-                className="mt-1 block w-full border px-3 py-2 rounded"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </label>
-            <label className="block mb-2">
-              <span className="text-sm">Confirm Password</span>
-              <input
-                className="mt-1 block w-full border px-3 py-2 rounded pr-10"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                type={showPassword ? "text" : "password"}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((s) => !s)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                aria-label={showPassword ? "Hide password" : "Show password"}
+            </div>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
               >
-                {showPassword ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.039.164-2.04.468-2.985M6.11 6.11A9.955 9.955 0 0112 5c5.523 0 10 4.477 10 10 0 1.042-.161 2.04-.466 2.984M3 3l18 18"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
-                  </svg>
-                )}
-              </button>
-            </label>
-            <label className="block mb-4 relative">
-              <span className="text-sm">Password</span>
+                Password
+              </label>
               <input
-                className="mt-1 block w-full border px-3 py-2 rounded pr-10"
+                id="password"
+                type="password"
+                autoComplete="new-password"
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                type={showPassword ? "text" : "password"}
-                required
+                className="mt-1 block w-full border border-gray-300 px-3 py-2 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter your password"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword((s) => !s)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                aria-label={showPassword ? "Hide password" : "Show password"}
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700"
               >
-                {showPassword ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.039.164-2.04.468-2.985M6.11 6.11A9.955 9.955 0 0112 5c5.523 0 10 4.477 10 10 0 1.042-.161 2.04-.466 2.984M3 3l18 18"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
-                  </svg>
-                )}
-              </button>
-            </label>
+                Confirm Password
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="mt-1 block w-full border border-gray-300 px-3 py-2 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Confirm your password"
+              />
+            </div>
+          </div>
+
+          <div>
             <button
-              className="w-full bg-blue-600 text-white py-2 rounded"
-              disabled={loading}
               type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Creating…" : "Create account"}
+              {loading ? "Creating account..." : "Create account"}
             </button>
-          </form>
-        </div>
+          </div>
+
+          {/* Debug info */}
+          <div className="text-xs text-gray-500 text-center bg-yellow-100 p-2 rounded">
+            🔥 API: {API_BASE_URL}/api/{API_VERSION}/auth/register
+          </div>
+        </form>
       </div>
     </div>
   );

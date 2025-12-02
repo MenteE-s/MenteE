@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://mentee-production-e517.up.railway.app';
-const API_VERSION = process.env.REACT_APP_API_VERSION || 'v1';
+// HARD-CODED for testing
+const API_BASE_URL = 'https://mentee-production-e517.up.railway.app';
+const API_VERSION = 'v1';
 
 const ProtectedRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -20,7 +21,10 @@ const ProtectedRoute = ({ children }) => {
           return;
         }
 
-        const response = await fetch(`${API_BASE_URL}/api/${API_VERSION}/auth/me`, {
+        const apiUrl = `${API_BASE_URL}/api/${API_VERSION}/auth/me`;
+        console.log('🔥 CALLING AUTH CHECK:', apiUrl);
+
+        const response = await fetch(apiUrl, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -28,20 +32,20 @@ const ProtectedRoute = ({ children }) => {
           },
         });
 
-        console.log(`${API_BASE_URL}/api/${API_VERSION}/auth/me status:`, response.status);
+        console.log('✅ Auth check status:', response.status);
 
         if (response.ok) {
           const data = await response.json();
-          console.log('Auth check successful:', data);
+          console.log('🎉 Auth check successful:', data);
           setIsAuthenticated(true);
         } else {
-          console.log('Auth check failed, removing token');
+          console.log('❌ Auth check failed, removing token');
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           setIsAuthenticated(false);
         }
       } catch (error) {
-        console.log(`${API_BASE_URL}/api/${API_VERSION}/auth/me network error:`, error);
+        console.log('💥 Auth check network error:', error);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setIsAuthenticated(false);
