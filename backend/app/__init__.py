@@ -17,6 +17,8 @@ from app.blueprints.recruai.routes.api import api_bp  # type: ignore
 # Register only implemented CVAI blueprints; drop non-existent/empty ones to avoid import errors
 from app.blueprints.cvai.routes import auth  # type: ignore
 from app.blueprints.cvai.routes.profile import profile_bp as cvai_profile_bp  # type: ignore
+from app.blueprints.cvai.routes.organization import bp as cvai_organization_bp  # type: ignore
+from app.blueprints.cvai.routes.recruting import bp as cvai_recruting_bp  # type: ignore
 
 
 def create_app(config_object: object | None = None):
@@ -63,6 +65,10 @@ def create_app(config_object: object | None = None):
 	app.register_blueprint(auth.bp, url_prefix="/api/cvai")
 	# Register CVAI profile routes
 	app.register_blueprint(cvai_profile_bp, url_prefix="/api/cvai/profile")
+	# Register CVAI organization routes
+	app.register_blueprint(cvai_organization_bp, url_prefix="/api/cvai")
+	# Register CVAI recruiting routes
+	app.register_blueprint(cvai_recruting_bp, url_prefix="/api/cvai")
 
 	@app.route('/uploads/<path:filename>')
 	def uploaded_file(filename):  # type: ignore
