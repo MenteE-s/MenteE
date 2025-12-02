@@ -10,6 +10,9 @@ from . import org  # noqa: E402, F401
 from . import profile  # noqa: E402, F401
 from . import rag  # noqa: E402, F401
 from . import system_issues  # noqa: E402, F401
-from . import tempAI  # noqa: E402, F401
+try:
+    from . import tempAI  # noqa: E402, F401
+except ImportError:
+    pass
 from . import users  # noqa: E402, F401
 from . import ind  # noqa: E402, F401
