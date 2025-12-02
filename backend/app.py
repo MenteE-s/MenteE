@@ -19,12 +19,18 @@ CORS(app)
 
 # Initialize database safely
 db = None
+database_url = os.getenv('DATABASE_URL')
+db_error = None
+
 try:
-    from flask_sqlalchemy import SQLAlchemy
-    from datetime import datetime
-    
-    database_url = os.getenv('DATABASE_URL')
     if database_url:
+        from flask_sqlalchemy import SQLAlchemy
+        from datetime import datetime
+        
+        # Fix potential Railway DATABASE_URL format
+        if database_url.startswith('postgres://'):
+            database_url = database_url.replace('postgres://', 'postgresql://', 1)
+        
         app.config['SQLALCHEMY_DATABASE_URI'] = database_url
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         
@@ -45,9 +51,11 @@ try:
         
         print("✅ SQLAlchemy initialized successfully")
     else:
-        print("❌ DATABASE_URL not found")
+        db_error = "DATABASE_URL environment variable not found"
+        print(f"❌ {db_error}")
         
 except Exception as e:
+    db_error = str(e)
     print(f"⚠️ Database initialization failed: {e}")
 
 # Routes
@@ -57,7 +65,19 @@ def root():
         "status": "ok",
         "message": "RecruAI Backend is running!",
         "version": "1.0.0",
-        "database": "connected" if db else "disabled"
+        "database": "connected" if db else "disabled",
+        "database_error": db_error
+    })
+
+@app.route('/debug-env')
+def debug_env():
+    """Debug environment variables"""
+    return jsonify({
+        "DATABASE_URL_exists": database_url is not None,
+        "DATABASE_URL_type": type(database_url).__name__,
+        "DATABASE_URL_length": len(database_url) if database_url else 0,
+        "DATABASE_URL_starts_with": database_url[:30] if database_url else None,
+        "all_env_count": len(os.environ)
     })
 
 @app.route('/health')
@@ -67,7 +87,7 @@ def health():
 @app.route('/create-tables')
 def create_tables():
     if not db:
-        return jsonify({"error": "Database not initialized"}), 500
+        return jsonify({"error": "Database not initialized", "reason": db_error}), 500
     
     try:
         db.create_all()
@@ -84,10 +104,9 @@ def create_tables():
 @app.route('/test-db')
 def test_db():
     if not db:
-        return jsonify({"error": "Database not initialized"}), 500
+        return jsonify({"error": "Database not initialized", "reason": db_error}), 500
     
     try:
-        # Test database connection
         with db.engine.connect() as connection:
             result = connection.execute(db.text('SELECT version()'))
             version = result.fetchone()[0]
