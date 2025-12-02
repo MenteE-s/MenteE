@@ -1,10 +1,20 @@
-
 import React, { useState, useEffect } from "react";
-import { Search, Briefcase, MapPin, Clock, Building, ExternalLink, Filter } from "lucide-react";
+import {
+  Search,
+  Briefcase,
+  MapPin,
+  Clock,
+  Building,
+  ExternalLink,
+  Filter,
+} from "lucide-react";
+import { API_BASE } from "../../config";
 
 const Jobs = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState([]);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLocation, setFilterLocation] = useState("all");
   const [filterType, setFilterType] = useState("all");
@@ -12,111 +22,65 @@ const Jobs = () => {
   const [savedJobs, setSavedJobs] = useState([]);
 
   useEffect(() => {
-    // Get user from local storage
-    try {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+    const loadData = async () => {
+      try {
+        // Get user from local storage
+        try {
+          const storedUser = localStorage.getItem("user");
+          if (storedUser) {
+            setUser(JSON.parse(storedUser));
+          }
+        } catch (err) {
+          console.error("Error parsing user data from localStorage:", err);
+        }
+
+        // Fetch jobs from API
+        const response = await fetch(`${API_BASE}/posts`, {
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setJobs(data.posts || []);
+        } else {
+          setError("Failed to load jobs");
+        }
+      } catch (err) {
+        console.error("Error loading data:", err);
+        setError("Network error. Please try again.");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Error parsing user data from localStorage:", err);
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    loadData();
   }, []);
 
-  // Mock data for job listings
-  const mockJobs = [
-    {
-      id: 1,
-      title: "Senior Frontend Developer",
-      company: "Google",
-      logo: "https://logo.clearbit.com/google.com",
-      location: "Mountain View, CA",
-      type: "Full-time",
-      remote: "Remote",
-      posted: "2 days ago",
-      description: "We're looking for an experienced Frontend Developer to join our team and help build the future of our products.",
-      skills: ["React", "TypeScript", "CSS", "UI/UX"],
-      salary: "$150k - $200k",
-    },
-    {
-      id: 2,
-      title: "Product Designer",
-      company: "Meta",
-      logo: "https://logo.clearbit.com/meta.com",
-      location: "Menlo Park, CA",
-      type: "Full-time",
-      remote: "Hybrid",
-      posted: "3 days ago",
-      description: "Join our design team to create intuitive and beautiful experiences for billions of users.",
-      skills: ["Figma", "Prototyping", "User Research", "Design Systems"],
-      salary: "$130k - $180k",
-    },
-    {
-      id: 3,
-      title: "Backend Engineer",
-      company: "Amazon",
-      logo: "https://logo.clearbit.com/amazon.com",
-      location: "Seattle, WA",
-      type: "Full-time",
-      remote: "Remote",
-      posted: "1 week ago",
-      description: "We're seeking a Backend Engineer to help scale our infrastructure and services.",
-      skills: ["Node.js", "AWS", "Databases", "Microservices"],
-      salary: "$140k - $190k",
-    },
-    {
-      id: 4,
-      title: "UX Researcher",
-      company: "Apple",
-      logo: "https://logo.clearbit.com/apple.com",
-      location: "Cupertino, CA",
-      type: "Full-time",
-      remote: "On-site",
-      posted: "4 days ago",
-      description: "Help us understand user needs and behaviors to inform product development.",
-      skills: ["User Research", "Data Analysis", "Prototyping", "Presentation"],
-      salary: "$120k - $160k",
-    },
-    {
-      id: 5,
-      title: "DevOps Engineer",
-      company: "Microsoft",
-      logo: "https://logo.clearbit.com/microsoft.com",
-      location: "Redmond, WA",
-      type: "Full-time",
-      remote: "Remote",
-      posted: "5 days ago",
-      description: "Join our team to build and maintain scalable infrastructure for our cloud services.",
-      skills: ["Docker", "Kubernetes", "CI/CD", "Cloud Platforms"],
-      salary: "$145k - $195k",
-    },
-    {
-      id: 6,
-      title: "Data Scientist",
-      company: "Netflix",
-      logo: "https://logo.clearbit.com/netflix.com",
-      location: "Los Gatos, CA",
-      type: "Full-time",
-      remote: "Remote",
-      posted: "1 week ago",
-      description: "Help us analyze data to improve our content recommendation algorithms.",
-      skills: ["Python", "Machine Learning", "Statistics", "Data Visualization"],
-      salary: "$135k - $185k",
-    },
-  ];
-
   // Filter jobs based on search term and filters
-  const filteredJobs = mockJobs.filter((job) => {
-    const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredJobs = jobs.filter((job) => {
+    const matchesSearch =
+      job.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.organization?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (job.requirements &&
+        job.requirements.some((req) =>
+          req.toLowerCase().includes(searchTerm.toLowerCase())
+        ));
 
-    const matchesLocation = filterLocation === "all" || job.location.includes(filterLocation);
-    const matchesType = filterType === "all" || job.type === filterType;
-    const matchesRemote = filterRemote === "all" || job.remote === filterRemote;
+    const matchesLocation =
+      filterLocation === "all" ||
+      (job.location &&
+        job.location.toLowerCase().includes(filterLocation.toLowerCase()));
+    const matchesType =
+      filterType === "all" || job.employment_type === filterType;
+    // For remote filter, we'll use location or a remote indicator if available
+    const matchesRemote =
+      filterRemote === "all" ||
+      (filterRemote === "Remote" &&
+        job.location?.toLowerCase().includes("remote")) ||
+      (filterRemote === "On-site" &&
+        !job.location?.toLowerCase().includes("remote"));
 
     return matchesSearch && matchesLocation && matchesType && matchesRemote;
   });
@@ -124,16 +88,22 @@ const Jobs = () => {
   // Toggle save job
   const toggleSaveJob = (jobId) => {
     if (savedJobs.includes(jobId)) {
-      setSavedJobs(savedJobs.filter(id => id !== jobId));
+      setSavedJobs(savedJobs.filter((id) => id !== jobId));
     } else {
       setSavedJobs([...savedJobs, jobId]);
     }
   };
 
   // Get unique locations for filter dropdown
-  const locations = ["all", "California", "Washington", "Remote"];
-  const types = ["all", "Full-time", "Part-time", "Contract", "Internship"];
-  const remoteOptions = ["all", "Remote", "Hybrid", "On-site"];
+  const locations = [
+    "all",
+    ...new Set(jobs.map((job) => job.location).filter(Boolean)),
+  ];
+  const types = [
+    "all",
+    ...new Set(jobs.map((job) => job.employment_type).filter(Boolean)),
+  ];
+  const remoteOptions = ["all", "Remote", "On-site"];
 
   if (loading) {
     return (
@@ -222,67 +192,115 @@ const Jobs = () => {
         {/* Jobs Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredJobs.map((job) => (
-            <div key={job.id} className="bg-white rounded-xl shadow-sm border border-primary-100 overflow-hidden hover:shadow-md transition-all">
+            <div
+              key={job.id}
+              className="bg-white rounded-xl shadow-sm border border-primary-100 overflow-hidden hover:shadow-md transition-all"
+            >
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center">
-                    <img
-                      src={job.logo}
-                      alt={job.company}
-                      className="h-12 w-12 rounded-lg object-contain mr-3"
-                    />
+                    {job.organization_details?.profile_image ? (
+                      <img
+                        src={job.organization_details.profile_image}
+                        alt={job.organization}
+                        className="h-12 w-12 rounded-lg object-contain mr-3"
+                      />
+                    ) : (
+                      <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center mr-3">
+                        <Building className="h-6 w-6 text-gray-500" />
+                      </div>
+                    )}
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-900">{job.title}</h3>
+                      <h3 className="text-lg font-semibold text-slate-900">
+                        {job.title}
+                      </h3>
                       <div className="flex items-center text-sm text-slate-500">
                         <Building className="h-4 w-4 mr-1" />
-                        {job.company}
+                        {job.organization || "Company not specified"}
                       </div>
                     </div>
                   </div>
                   <button
                     onClick={() => toggleSaveJob(job.id)}
-                    className={`p-2 rounded-lg ${savedJobs.includes(job.id) ? 'bg-primary-100 text-primary-600' : 'bg-gray-100 text-gray-400 hover:text-gray-600'}`}
+                    className={`p-2 rounded-lg ${
+                      savedJobs.includes(job.id)
+                        ? "bg-primary-100 text-primary-600"
+                        : "bg-gray-100 text-gray-400 hover:text-gray-600"
+                    }`}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                   </button>
                 </div>
 
                 <div className="flex items-center text-sm text-slate-500 mb-4">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  {job.location}
-                  <span className="mx-2">•</span>
-                  <Briefcase className="h-4 w-4 mr-1" />
-                  {job.type}
-                  <span className="mx-2">•</span>
-                  {job.remote}
-                </div>
-
-                <p className="text-sm text-slate-600 mb-4 line-clamp-2">
-                  {job.description}
-                </p>
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {job.skills.slice(0, 3).map((skill, idx) => (
-                    <span key={idx} className="px-2 py-1 bg-primary-50 text-primary-600 text-xs rounded-full">
-                      {skill}
-                    </span>
-                  ))}
-                  {job.skills.length > 3 && (
-                    <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                      +{job.skills.length - 3} more
-                    </span>
+                  {job.location && (
+                    <>
+                      <MapPin className="h-4 w-4 mr-1" />
+                      {job.location}
+                      <span className="mx-2">•</span>
+                    </>
+                  )}
+                  {job.employment_type && (
+                    <>
+                      <Briefcase className="h-4 w-4 mr-1" />
+                      {job.employment_type}
+                    </>
+                  )}
+                  {job.category && (
+                    <>
+                      <span className="mx-2">•</span>
+                      {job.category}
+                    </>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <div className="text-sm font-medium text-primary-600">
-                    {job.salary}
+                <p className="text-sm text-slate-600 mb-4 line-clamp-2">
+                  {job.description || "No description available."}
+                </p>
+
+                {job.requirements && job.requirements.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {job.requirements.slice(0, 3).map((req, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2 py-1 bg-primary-50 text-primary-600 text-xs rounded-full"
+                      >
+                        {req}
+                      </span>
+                    ))}
+                    {job.requirements.length > 3 && (
+                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                        +{job.requirements.length - 3} more
+                      </span>
+                    )}
                   </div>
+                )}
+
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  {(job.salary_min || job.salary_max) && (
+                    <div className="text-sm font-medium text-primary-600">
+                      {job.salary_currency || "$"}
+                      {job.salary_min && job.salary_max
+                        ? `${job.salary_min} - ${job.salary_max}`
+                        : job.salary_min || job.salary_max}
+                    </div>
+                  )}
                   <div className="flex items-center text-xs text-slate-500">
                     <Clock className="h-3 w-3 mr-1" />
-                    {job.posted}
+                    {job.created_at
+                      ? new Date(job.created_at).toLocaleDateString()
+                      : "Date not available"}
                   </div>
                 </div>
               </div>
@@ -293,8 +311,12 @@ const Jobs = () => {
         {filteredJobs.length === 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-primary-100 p-8 text-center">
             <Briefcase className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-slate-900 mb-2">No jobs found</h3>
-            <p className="text-slate-500">Try adjusting your search or filter criteria</p>
+            <h3 className="text-lg font-medium text-slate-900 mb-2">
+              No jobs found
+            </h3>
+            <p className="text-slate-500">
+              Try adjusting your search or filter criteria
+            </p>
           </div>
         )}
       </div>

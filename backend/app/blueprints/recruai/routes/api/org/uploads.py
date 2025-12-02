@@ -56,12 +56,14 @@ def upload_organization_profile_image(org_id):
     extension = filename.rsplit('.', 1)[1].lower()
     unique_filename = f"org_{org_id}_profile.{extension}"
 
-    # Save file
-    upload_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'uploads', 'organization_images', 'profile_images', unique_filename)
-    file.save(upload_path)
-
-    # Update organization profile image path
-    profile_image_url = f"/uploads/organization_images/profile_images/{unique_filename}"
+    # Upload file using storage utility
+    from app.utils.storage import upload_file
+    profile_image_url = upload_file(
+        file=file,
+        filename=f"organization_images/profile_images/{unique_filename}",
+        folder="uploads",  # Unified bucket
+        content_type=file.content_type
+    )
     org.profile_image = profile_image_url
     db.session.commit()
 
@@ -120,12 +122,14 @@ def upload_organization_banner_image(org_id):
     extension = filename.rsplit('.', 1)[1].lower()
     unique_filename = f"org_{org_id}_banner.{extension}"
 
-    # Save file
-    upload_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'uploads', 'organization_images', 'banner_images', unique_filename)
-    file.save(upload_path)
-
-    # Update organization banner image path
-    banner_image_url = f"/uploads/organization_images/banner_images/{unique_filename}"
+    # Upload file using storage utility
+    from app.utils.storage import upload_file
+    banner_image_url = upload_file(
+        file=file,
+        filename=f"organization_images/banner_images/{unique_filename}",
+        folder="uploads",  # Unified bucket
+        content_type=file.content_type
+    )
     org.banner_image = banner_image_url
     db.session.commit()
 

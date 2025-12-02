@@ -86,6 +86,18 @@ def profile_root():
         user.name = data["name"]
     if "plan" in data:
         user.plan = data["plan"]
+    if "phone" in data:
+        user.phone = data["phone"]
+    if "location" in data:
+        user.location = data["location"]
+    if "timezone" in data:
+        user.timezone = data["timezone"]
+    if "linkedin_url" in data:
+        user.linkedin_url = data["linkedin_url"]
+    if "github_url" in data:
+        user.github_url = data["github_url"]
+    if "website_url" in data:
+        user.website_url = data["website_url"]
     db.session.commit()
     return jsonify({"user": user.to_dict()}), 200
 

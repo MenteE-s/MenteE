@@ -42,8 +42,25 @@ const Footer = () => {
               recruitment.
             </p>
             <div className="flex space-x-4">
+              {/* adding website */}
               <a
-                href="https://twitter.com/mentee_ai"
+                href="https://www.syab.tech/mentee"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-secondary-400 hover:text-white transition-colors"
+                aria-label="Visit our website"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm0 22C6.486 22 2 17.514 2 12S6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z" />
+                  <path d="M12 5a7 7 0 100 14 7 7 0 000-14zm0 12a5 5 0 110-10 5 5 0 010 10z" />
+                </svg>
+              </a>
+              <a
+                href="https://x.com/mentee_ai"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-secondary-400 hover:text-white transition-colors"

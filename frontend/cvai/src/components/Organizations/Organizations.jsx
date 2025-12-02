@@ -1,148 +1,76 @@
-
 import React, { useState, useEffect } from "react";
-import { Building, MapPin, Briefcase, ExternalLink, Search, Filter } from "lucide-react";
+import {
+  Building,
+  MapPin,
+  Briefcase,
+  ExternalLink,
+  Search,
+  Filter,
+} from "lucide-react";
+import { API_BASE } from "../../config";
 
 const Organizations = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [organizations, setOrganizations] = useState([]);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterIndustry, setFilterIndustry] = useState("all");
 
   useEffect(() => {
-    // Get user from local storage
-    try {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+    const loadData = async () => {
+      try {
+        // Get user from local storage
+        try {
+          const storedUser = localStorage.getItem("user");
+          if (storedUser) {
+            setUser(JSON.parse(storedUser));
+          }
+        } catch (err) {
+          console.error("Error parsing user data from localStorage:", err);
+        }
+
+        // Fetch organizations from API
+        const response = await fetch(`${API_BASE}/organizations`, {
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setOrganizations(data.organizations || []);
+        } else {
+          setError("Failed to load organizations");
+        }
+      } catch (err) {
+        console.error("Error loading data:", err);
+        setError("Network error. Please try again.");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Error parsing user data from localStorage:", err);
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    loadData();
   }, []);
 
-  // Mock data for organizations
-  const mockOrganizations = [
-    {
-      id: 1,
-      name: "Google",
-      logo: "https://logo.clearbit.com/google.com",
-      views: 142,
-      shares: 28,
-      downloads: 15,
-      industry: "Technology",
-      location: "Mountain View, CA",
-      lastViewed: "2023-11-10",
-      website: "https://google.com",
-      description: "Multinational technology company specializing in Internet-related services and products.",
-    },
-    {
-      id: 2,
-      name: "Microsoft",
-      logo: "https://logo.clearbit.com/microsoft.com",
-      views: 98,
-      shares: 21,
-      downloads: 12,
-      industry: "Technology",
-      location: "Redmond, WA",
-      lastViewed: "2023-11-09",
-      website: "https://microsoft.com",
-      description: "Technology company that develops, manufactures, licenses, supports, and sells computer software, consumer electronics, and personal computers.",
-    },
-    {
-      id: 3,
-      name: "Amazon",
-      logo: "https://logo.clearbit.com/amazon.com",
-      views: 87,
-      shares: 19,
-      downloads: 8,
-      industry: "E-commerce",
-      location: "Seattle, WA",
-      lastViewed: "2023-11-08",
-      website: "https://amazon.com",
-      description: "Multinational technology company focusing on e-commerce, cloud computing, digital streaming, and artificial intelligence.",
-    },
-    {
-      id: 4,
-      name: "Meta",
-      logo: "https://logo.clearbit.com/meta.com",
-      views: 76,
-      shares: 16,
-      downloads: 10,
-      industry: "Technology",
-      location: "Menlo Park, CA",
-      lastViewed: "2023-11-07",
-      website: "https://meta.com",
-      description: "Technology conglomerate that builds technologies that help people connect and share.",
-    },
-    {
-      id: 5,
-      name: "Apple",
-      logo: "https://logo.clearbit.com/apple.com",
-      views: 65,
-      shares: 14,
-      downloads: 7,
-      industry: "Technology",
-      location: "Cupertino, CA",
-      lastViewed: "2023-11-06",
-      website: "https://apple.com",
-      description: "Multinational technology company that specializes in consumer electronics, computer software, and online services.",
-    },
-    {
-      id: 6,
-      name: "Netflix",
-      logo: "https://logo.clearbit.com/netflix.com",
-      views: 58,
-      shares: 12,
-      downloads: 6,
-      industry: "Entertainment",
-      location: "Los Gatos, CA",
-      lastViewed: "2023-11-05",
-      website: "https://netflix.com",
-      description: "Subscription streaming service and production company.",
-    },
-    {
-      id: 7,
-      name: "Tesla",
-      logo: "https://logo.clearbit.com/tesla.com",
-      views: 52,
-      shares: 11,
-      downloads: 5,
-      industry: "Automotive",
-      location: "Palo Alto, CA",
-      lastViewed: "2023-11-04",
-      website: "https://tesla.com",
-      description: "Electric vehicle and clean energy company.",
-    },
-    {
-      id: 8,
-      name: "Spotify",
-      logo: "https://logo.clearbit.com/spotify.com",
-      views: 47,
-      shares: 9,
-      downloads: 4,
-      industry: "Entertainment",
-      location: "Stockholm, Sweden",
-      lastViewed: "2023-11-03",
-      website: "https://spotify.com",
-      description: "Audio streaming and media services provider.",
-    },
-  ];
-
   // Filter organizations based on search term and industry
-  const filteredOrganizations = mockOrganizations.filter((org) => {
-    const matchesSearch = org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         org.industry.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         org.location.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredOrganizations = organizations.filter((org) => {
+    const matchesSearch =
+      org.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      org.industry?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      org.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      org.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesIndustry = filterIndustry === "all" || org.industry === filterIndustry;
+    const matchesIndustry =
+      filterIndustry === "all" || org.industry === filterIndustry;
 
     return matchesSearch && matchesIndustry;
   });
 
   // Get unique industries for filter dropdown
-  const industries = ["all", ...new Set(mockOrganizations.map(org => org.industry))];
+  const industries = [
+    "all",
+    ...new Set(organizations.map((org) => org.industry).filter(Boolean)),
+  ];
 
   if (loading) {
     return (
@@ -201,59 +129,69 @@ const Organizations = () => {
         {/* Organizations Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredOrganizations.map((org) => (
-            <div key={org.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+            <div
+              key={org.id}
+              className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+            >
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center">
-                    <img
-                      src={org.logo}
-                      alt={org.name}
-                      className="h-12 w-12 rounded-lg object-contain mr-3"
-                    />
+                    {org.profile_image ? (
+                      <img
+                        src={org.profile_image}
+                        alt={org.name}
+                        className="h-12 w-12 rounded-lg object-contain mr-3"
+                      />
+                    ) : (
+                      <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center mr-3">
+                        <Building className="h-6 w-6 text-gray-500" />
+                      </div>
+                    )}
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-900">{org.name}</h3>
+                      <h3 className="text-lg font-semibold text-slate-900">
+                        {org.name}
+                      </h3>
                       <div className="flex items-center text-sm text-slate-500">
                         <Briefcase className="h-4 w-4 mr-1" />
-                        {org.industry}
+                        {org.industry || "Industry not specified"}
                       </div>
                     </div>
                   </div>
-                  <a
-                    href={org.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-slate-400 hover:text-slate-600"
-                  >
-                    <ExternalLink className="h-5 w-5" />
-                  </a>
+                  {org.website && (
+                    <a
+                      href={org.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-slate-400 hover:text-slate-600"
+                    >
+                      <ExternalLink className="h-5 w-5" />
+                    </a>
+                  )}
                 </div>
 
                 <p className="text-sm text-slate-600 mb-4 line-clamp-2">
-                  {org.description}
+                  {org.description || "No description available."}
                 </p>
 
-                <div className="flex items-center text-sm text-slate-500 mb-4">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  {org.location}
-                </div>
+                {org.location && (
+                  <div className="flex items-center text-sm text-slate-500 mb-4">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    {org.location}
+                  </div>
+                )}
 
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="bg-gray-50 rounded-lg p-2">
-                    <div className="text-lg font-semibold text-slate-900">{org.views}</div>
-                    <div className="text-xs text-slate-500">Views</div>
+                {org.company_size && (
+                  <div className="flex items-center text-sm text-slate-500 mb-4">
+                    <Building className="h-4 w-4 mr-1" />
+                    {org.company_size} employees
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-2">
-                    <div className="text-lg font-semibold text-slate-900">{org.shares}</div>
-                    <div className="text-xs text-slate-500">Shares</div>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-2">
-                    <div className="text-lg font-semibold text-slate-900">{org.downloads}</div>
-                    <div className="text-xs text-slate-500">Downloads</div>
-                  </div>
-                </div>
+                )}
 
                 <div className="mt-4 pt-4 border-t border-gray-100 text-xs text-slate-500">
-                  Last viewed: {new Date(org.lastViewed).toLocaleDateString()}
+                  Founded:{" "}
+                  {org.created_at
+                    ? new Date(org.created_at).toLocaleDateString()
+                    : "Date not available"}
                 </div>
               </div>
             </div>
@@ -263,8 +201,12 @@ const Organizations = () => {
         {filteredOrganizations.length === 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
             <Building className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-slate-900 mb-2">No organizations found</h3>
-            <p className="text-slate-500">Try adjusting your search or filter criteria</p>
+            <h3 className="text-lg font-medium text-slate-900 mb-2">
+              No organizations found
+            </h3>
+            <p className="text-slate-500">
+              Try adjusting your search or filter criteria
+            </p>
           </div>
         )}
       </div>
