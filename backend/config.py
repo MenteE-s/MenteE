@@ -2,42 +2,41 @@ import os
 from dotenv import load_dotenv
 
 
-# Load backend/.env so imports that evaluate at module import time (like
-# Config.SQLALCHEMY_DATABASE_URI) pick up the DATABASE_URL when CLI or
-# scripts import this module from repo root.
-here = os.path.dirname(os.path.abspath(__file__))
-load_dotenv(os.path.join(here, ".env"))
+load_dotenv()
 
 
 class Config:
-    """Default configuration. Reads DATABASE_URL from env.
+    SECRET_KEY = os.environ.get("SECRET_KEY")
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
 
-    DATABASE_URL example: postgresql://user:pass@host:5432/dbname
-    """
-
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL",
-        # Local dev default: prefer Postgres at default creds per developer request.
-        "postgresql://postgres:mentee@localhost:5432/memotions",
-    )
+    # Database - use Supabase PostgreSQL
+    DATABASE_URL = os.environ.get("DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI = DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret")
-    # JWT uses its own key, but default to SECRET_KEY when not provided
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", SECRET_KEY)
 
-    # Default JWT cookie settings: use cookies for tokens (safer than localStorage
-    # if the frontend is configured to use them). These can be overridden via
-    # environment variables for flexibility.
-    # Accept tokens from headers for SPAs, and cookies when configured.
-    JWT_TOKEN_LOCATION = os.getenv("JWT_TOKEN_LOCATION", "headers,cookies").split(",")
-    JWT_COOKIE_SECURE = os.getenv("JWT_COOKIE_SECURE", "0") == "1"
-    JWT_COOKIE_SAMESITE = os.getenv("JWT_COOKIE_SAMESITE", "Lax")
-    # protect cookies with CSRF double-submit cookie if true
-    # By default disable CSRF protection for cookies in local dev to keep the
-    # client simple; enable in production by setting JWT_COOKIE_CSRF_PROTECT=1
-    # and handling the CSRF token on the client side.
-    JWT_COOKIE_CSRF_PROTECT = os.getenv("JWT_COOKIE_CSRF_PROTECT", "0") == "1"
+    # API Keys
+    GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+    GROQ_MODEL = os.environ.get("GROQ_MODEL", "mixtral-8x7b-32768")
 
-    # JWT token expiration: 24 hours by default
-    from datetime import timedelta
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES_HOURS", "24")))
+    # CORS
+    FRONTEND_ORIGIN = os.environ.get("FRONTEND_ORIGIN", "http://localhost:3000")
+
+    # Supabase (optional, for direct client if needed)
+    SUPABASE_URL = os.environ.get("SUPABASE_URL")
+    SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY")
+
+
+class ProductionConfig(Config):
+    DEBUG = False
+
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+
+
+# Export config
+config = {
+    "development": DevelopmentConfig,
+    "production": ProductionConfig,
+    "default": DevelopmentConfig,
+}
