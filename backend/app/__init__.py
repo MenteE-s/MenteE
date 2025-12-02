@@ -20,6 +20,22 @@ from app.blueprints.cvai.routes.profile import profile_bp as cvai_profile_bp  # 
 from app.blueprints.cvai.routes.organization import bp as cvai_organization_bp  # type: ignore
 from app.blueprints.cvai.routes.recruting import bp as cvai_recruting_bp  # type: ignore
 
+# Initialize Supabase client for storage
+supabase_client = None
+try:
+    from supabase import create_client
+    supabase_url = os.getenv('SUPABASE_URL')
+    supabase_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY') or os.getenv('SUPABASE_ANON_KEY')
+    if supabase_url and supabase_key:
+        supabase_client = create_client(supabase_url, supabase_key)
+        print("✅ Supabase storage initialized")
+    else:
+        print("⚠️  Supabase credentials not found, using local storage")
+except ImportError:
+    print("⚠️  Supabase library not installed, using local storage")
+except Exception as e:
+    print(f"⚠️  Supabase initialization failed: {e}, using local storage")
+
 
 def create_app(config_object: object | None = None):
 	"""Flask application factory.
@@ -72,11 +88,9 @@ def create_app(config_object: object | None = None):
 
 	@app.route('/uploads/<path:filename>')
 	def uploaded_file(filename):  # type: ignore
+		"""Serve all uploaded files from unified uploads directory.
+		Handles profile pictures, organization images, banners, etc."""
 		return send_from_directory(os.path.join(os.path.dirname(here), 'uploads'), filename)
-
-	@app.route('/uploads/organization_images/<path:filename>')
-	def organization_uploaded_file(filename):  # type: ignore
-		return send_from_directory(os.path.join(os.path.dirname(here), 'app', 'services', 'recruai', 'uploads', 'organization_images'), filename)
 
 	app.config.setdefault("SESSION_COOKIE_HTTPONLY", True)
 	app.config.setdefault("SESSION_COOKIE_SECURE", os.getenv("SESSION_COOKIE_SECURE", "0") == "1")

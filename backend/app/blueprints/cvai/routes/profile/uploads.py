@@ -46,14 +46,14 @@ def upload_profile_picture():
     extension = filename.rsplit('.', 1)[1].lower()
     unique_filename = f"user_{user_id_int}_profile.{extension}"
 
-    # Save file (ensure the upload directory exists before writing)
-    uploads_root = os.path.join(os.path.dirname(current_app.root_path), 'uploads', 'profile_pictures')
-    os.makedirs(uploads_root, exist_ok=True)
-    upload_path = os.path.join(uploads_root, unique_filename)
-    file.save(upload_path)
-
-    # Update user profile picture path
-    profile_picture_url = f"/uploads/profile_pictures/{unique_filename}"
+    # Upload file using storage utility
+    from app.utils.storage import upload_file
+    profile_picture_url = upload_file(
+        file=file,
+        filename=f"profile_pictures/{unique_filename}",
+        folder="uploads",  # Unified bucket
+        content_type=file.content_type
+    )
     user.profile_picture = profile_picture_url
     try:
         db.session.commit()
