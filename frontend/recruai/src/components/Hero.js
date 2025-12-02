@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import { Link } from "react-router-dom";
 const Hero = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
@@ -104,7 +104,7 @@ const Hero = () => {
                 <button className="group relative bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-primary-500/25 animate-pulse-glow overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-shimmer"></div>
                   <span className="relative flex items-center justify-center">
-                    Start Free Forever
+                    <Link to="/dashboard">Get Started Free</Link>
                     <svg
                       className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform"
                       fill="currentColor"
@@ -132,7 +132,7 @@ const Hero = () => {
                         clipRule="evenodd"
                       />
                     </svg>
-                    Schedule Demo
+                    <Link to="/dashboard">Schedule Demo</Link>
                   </span>
                 </button>
               </div>
