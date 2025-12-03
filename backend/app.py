@@ -379,14 +379,30 @@ def debug_jwt_config():
 
 # Register the RecruAI API blueprint to get all the additional endpoints
 # The blueprint routes are under /api (without /v1)
+blueprint_error = None
+blueprint_registered = False
 try:
     from src.blueprints.recruai.routes.api import api_bp
     app.register_blueprint(api_bp, url_prefix="/api")
     print("✅ RecruAI API blueprint registered")
+    blueprint_registered = True
 except Exception as e:
+    blueprint_error = f"{type(e).__name__}: {str(e)}"
     print(f"⚠️ Could not register RecruAI blueprint: {e}")
     import traceback
     traceback.print_exc()
+
+@app.route('/api/v1/debug/blueprint')
+def debug_blueprint():
+    """Debug endpoint to check blueprint registration"""
+    return jsonify({
+        "blueprint_registered": blueprint_registered,
+        "blueprint_error": blueprint_error,
+        "src_exists": __import__('os').path.exists('src'),
+        "src_blueprints_exists": __import__('os').path.exists('src/blueprints'),
+        "cwd": __import__('os').getcwd(),
+        "dir_contents": __import__('os').listdir('.')
+    })
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
