@@ -98,8 +98,8 @@ export default function TeamMembers() {
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/organizations/${organizationId}/team-members`,
+      const response = await apiFetch(
+        `/api/v1/organizations/${organizationId}/team-members`,
         {
           credentials: "include",
         }
@@ -132,8 +132,8 @@ export default function TeamMembers() {
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/organizations/${organizationId}/invite`,
+      const response = await apiFetch(
+        `/api/v1/organizations/${organizationId}/invite`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -165,8 +165,8 @@ export default function TeamMembers() {
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/organizations/${organizationId}/team-members/${editingMember.id}`,
+      const response = await apiFetch(
+        `/api/v1/organizations/${organizationId}/team-members/${editingMember.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -199,8 +199,8 @@ export default function TeamMembers() {
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/organizations/${organizationId}/team-members/${editingMember.id}`,
+      const response = await apiFetch(
+        `/api/v1/organizations/${organizationId}/team-members/${editingMember.id}`,
         {
           method: "DELETE",
           credentials: "include",

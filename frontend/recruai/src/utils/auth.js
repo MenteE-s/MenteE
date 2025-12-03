@@ -62,10 +62,8 @@ export const authAPI = {
 
       if (typeof window !== "undefined" && data.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
-        if (data.user.role)
-          localStorage.setItem("authRole", data.user.role);
-        if (data.user.plan)
-          localStorage.setItem("authPlan", data.user.plan);
+        if (data.user.role) localStorage.setItem("authRole", data.user.role);
+        if (data.user.plan) localStorage.setItem("authPlan", data.user.plan);
       }
 
       return data;
@@ -106,10 +104,8 @@ export const authAPI = {
 
         if (data.user) {
           localStorage.setItem("user", JSON.stringify(data.user));
-          if (data.user.role)
-            localStorage.setItem("authRole", data.user.role);
-          if (data.user.plan)
-            localStorage.setItem("authPlan", data.user.plan);
+          if (data.user.role) localStorage.setItem("authRole", data.user.role);
+          if (data.user.plan) localStorage.setItem("authPlan", data.user.plan);
         }
       }
 

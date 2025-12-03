@@ -67,8 +67,8 @@ const ScheduleInterviewModal = ({
       return;
     }
     try {
-      const response = await fetch(
-        `/api/organizations/${organizationId}/posts`,
+      const response = await apiFetch(
+        `/api/v1/organizations/${organizationId}/posts`,
         {
           credentials: "include",
         }
@@ -1007,8 +1007,8 @@ export default function InterviewManagement() {
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/interviews/${selectedInterview.id}/assign-agent`,
+      const response = await apiFetch(
+        `/api/v1/interviews/${selectedInterview.id}/assign-agent`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1122,8 +1122,8 @@ export default function InterviewManagement() {
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/organizations/${organizationId}/interviews/${selectedInterview.id}/decision`,
+      const response = await apiFetch(
+        `/api/v1/organizations/${organizationId}/interviews/${selectedInterview.id}/decision`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

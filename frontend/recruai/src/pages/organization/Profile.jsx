@@ -295,7 +295,7 @@ export default function OrganizationProfile() {
       const targetOrgId = orgId || currentUserOrgId;
 
       const response = await fetch(
-        `/api/organizations/${targetOrgId}/profile`,
+        `/api/v1/organizations/${targetOrgId}/profile`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -345,7 +345,7 @@ export default function OrganizationProfile() {
       const targetOrgId = orgId || currentUserOrgId;
 
       const response = await fetch(
-        `/api/organizations/${targetOrgId}/profile`,
+        `/api/v1/organizations/${targetOrgId}/profile`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -401,8 +401,8 @@ export default function OrganizationProfile() {
 
       const endpoint =
         imageType === "profile"
-          ? `/api/organizations/${targetOrgId}/upload-profile-image`
-          : `/api/organizations/${targetOrgId}/upload-banner-image`;
+          ? `/api/v1/organizations/${targetOrgId}/upload-profile-image`
+          : `/api/v1/organizations/${targetOrgId}/upload-banner-image`;
 
       console.log(`Uploading to endpoint: ${endpoint}`);
       const response = await fetch(endpoint, {
@@ -449,7 +449,7 @@ export default function OrganizationProfile() {
       const targetOrgId = orgId || currentUserOrgId;
 
       const response = await fetch(
-        `/api/organizations/${targetOrgId}/profile`,
+        `/api/v1/organizations/${targetOrgId}/profile`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

@@ -23,8 +23,11 @@ export default function OrganizationSettings() {
         const userData = await verifyTokenWithServer();
         setUser(userData);
         if (userData && userData.organization_id) {
-          const orgRes = await fetch(
-            `/api/organizations/${userData.organization_id}`
+          const orgRes = await apiFetch(
+            `/api/v1/organizations/${userData.organization_id}`,
+            {
+              credentials: "include",
+            }
           );
           if (orgRes.ok) {
             const orgData = await orgRes.json();

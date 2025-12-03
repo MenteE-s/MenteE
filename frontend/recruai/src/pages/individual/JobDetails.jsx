@@ -631,6 +631,3 @@ export default function JobDetails() {
     </DashboardLayout>
   );
 }
-
-
-

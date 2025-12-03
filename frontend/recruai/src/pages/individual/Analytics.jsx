@@ -31,7 +31,9 @@ export default function Analytics() {
       }
       setUserId(targetUserId);
 
-      const response = await apiFetch(`/api/v1/users/${targetUserId}/analytics`);
+      const response = await apiFetch(
+        `/api/v1/users/${targetUserId}/analytics`
+      );
       if (response.ok) {
         const data = await response.json();
         setAnalytics(data);

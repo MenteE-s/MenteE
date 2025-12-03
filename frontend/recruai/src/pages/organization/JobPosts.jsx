@@ -65,7 +65,7 @@ export default function JobPosts() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = editingPost ? `/api/posts/${editingPost.id}` : "/api/posts";
+      const url = editingPost ? `/api/v1/posts/${editingPost.id}` : "/api/v1/posts";
       const method = editingPost ? "PUT" : "POST";
 
       const orgId = editingPost?.organization_id ?? organizationId;
@@ -84,7 +84,7 @@ export default function JobPosts() {
         requirements: formData.requirements.filter((req) => req.trim()),
       };
 
-      const response = await fetch(url, {
+      const response = await apiFetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         credentials: "include",

@@ -15,7 +15,7 @@ export default function Pipeline() {
   const [pipelineData, setPipelineData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState(null);
-  const [orgId, setOrgId] = useState(1); // TODO: Get from user context
+  const [orgId, setOrgId] = useState(null);
 
   const pipelineStages = [
     { key: "applied", label: "Applied", color: "blue", icon: "📝" },
@@ -49,12 +49,34 @@ export default function Pipeline() {
   ];
 
   useEffect(() => {
-    fetchPipelineData();
+    const fetchOrgId = async () => {
+      try {
+        const res = await apiFetch("/api/v1/auth/me", {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user?.organization_id) {
+            setOrgId(data.user.organization_id);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching auth info:", error);
+      }
+    };
+
+    fetchOrgId();
   }, []);
 
-  const fetchPipelineData = async () => {
+  useEffect(() => {
+    if (orgId) {
+      fetchPipelineData(orgId);
+    }
+  }, [orgId]);
+
+  const fetchPipelineData = async (targetOrgId) => {
     try {
-      const response = await apiFetch(`/api/v1/pipeline/${orgId}`, {
+      const response = await apiFetch(`/api/v1/pipeline/${targetOrgId}`, {
         credentials: "include",
       });
       if (response.ok) {
@@ -73,8 +95,8 @@ export default function Pipeline() {
 
   const updatePipelineStage = async (applicationId, newStage) => {
     try {
-      const response = await fetch(
-        `/api/pipeline/application/${applicationId}/stage`,
+      const response = await apiFetch(
+        `/api/v1/pipeline/application/${applicationId}/stage`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -83,7 +105,9 @@ export default function Pipeline() {
         }
       );
       if (response.ok) {
-        fetchPipelineData(); // Refresh data
+        if (orgId) {
+          fetchPipelineData(orgId); // Refresh data
+        }
       }
     } catch (error) {
       console.error("Error updating pipeline stage:", error);

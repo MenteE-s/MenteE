@@ -552,6 +552,3 @@ export default function InterviewHistory() {
     </DashboardLayout>
   );
 }
-
-
-

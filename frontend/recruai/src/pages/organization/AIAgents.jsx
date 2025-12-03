@@ -2,7 +2,7 @@ import React, { useCallback, useState, useEffect } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import OrganizationNavbar from "../../components/layout/OrganizationNavbar";
 import Card from "../../components/ui/Card";
-import { getSidebarItems, verifyTokenWithServer , apiFetch } from "../../utils/auth";
+import { getSidebarItems, verifyTokenWithServer, apiFetch } from "../../utils/auth";
 import { useToast } from "../../components/ui/ToastContext";
 import { formatDate } from "../../utils/timezone";
 
@@ -38,8 +38,8 @@ export default function AIAgents() {
     }
     setLoading(true);
     try {
-      const response = await fetch(
-        `/api/organizations/${organizationId}/ai-agents`,
+      const response = await apiFetch(
+        `/api/v1/organizations/${organizationId}/ai-agents`,
         {
           credentials: "include",
         }
@@ -123,8 +123,8 @@ export default function AIAgents() {
     }
     try {
       const url = editingAgent
-        ? `/api/ai-agents/${editingAgent.id}`
-        : `/api/organizations/${targetOrgId}/ai-agents`;
+        ? `/api/v1/ai-agents/${editingAgent.id}`
+        : `/api/v1/organizations/${targetOrgId}/ai-agents`;
       const method = editingAgent ? "PUT" : "POST";
       const payload = {
         ...formData,
@@ -134,7 +134,7 @@ export default function AIAgents() {
         delete payload.system_prompt;
       }
 
-      const response = await fetch(url, {
+      const response = await apiFetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         credentials: "include",
