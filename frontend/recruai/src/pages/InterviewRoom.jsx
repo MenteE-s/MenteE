@@ -172,10 +172,8 @@ const InterviewRoom = () => {
         // Handle response based on interview mode
         if (interviewMode === "auto") {
           // Auto mode: Get AI response automatically (works even without specific ai_agent_id)
-          const aiResponse = await fetch("http://localhost:5000/api/ai/chat", {
+          const aiResponse = await apiFetch(`/api/ai/chat`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
             body: JSON.stringify({
               interview_id: interviewId,
               message: message,
@@ -183,7 +181,7 @@ const InterviewRoom = () => {
                 role: msg.userId === aiUserId ? "assistant" : "user",
                 content: msg.content,
               })),
-              agent_id: interview?.ai_agent_id || 1, // Default to agent 1 if not specified
+              agent_id: interview?.ai_agent_id || 1,
             }),
           });
 

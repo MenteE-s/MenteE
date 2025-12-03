@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import IndividualNavbar from "../../components/layout/IndividualNavbar";
 import Card from "../../components/ui/Card";
-import { getSidebarItems } from "../../utils/auth";
+import {
+  getSidebarItems,
+  apiFetch,
+  API_ENDPOINTS,
+  authAPI,
+} from "../../utils/auth";
 import { formatDate } from "../../utils/timezone";
 
 export default function SavedJobs() {
@@ -23,10 +28,9 @@ export default function SavedJobs() {
 
   const fetchSavedJobs = async () => {
     try {
-      const userId = 1; // TODO: Get from user context
-      const response = await fetch(
-        `http://localhost:5000/api/saved-jobs/user/${userId}`
-      );
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const userId = user.id || 1;
+      const response = await apiFetch(`/api/saved-jobs/user/${userId}`);
       if (response.ok) {
         const data = await response.json();
         setSavedJobs(data);
@@ -40,10 +44,9 @@ export default function SavedJobs() {
 
   const fetchAppliedJobs = async () => {
     try {
-      const userId = 1; // TODO: Get from user context
-      const response = await fetch(
-        `http://localhost:5000/api/applications/user/${userId}`
-      );
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const userId = user.id || 1;
+      const response = await apiFetch(`/api/applications/user/${userId}`);
       if (response.ok) {
         const data = await response.json();
         const appliedIds = new Set(data.map((app) => app.post_id));
@@ -56,13 +59,9 @@ export default function SavedJobs() {
 
   const handleUnsaveJob = async (savedId) => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/saved-jobs/${savedId}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
+      const response = await apiFetch(`/api/saved-jobs/${savedId}`, {
+        method: "DELETE",
+      });
 
       if (response.ok) {
         setSavedJobs((prev) => prev.filter((job) => job.id !== savedId));
@@ -74,11 +73,10 @@ export default function SavedJobs() {
 
   const handleApplyJob = async (postId) => {
     try {
-      const userId = 1; // TODO: Get from user context
-      const response = await fetch("http://localhost:5000/api/applications", {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const userId = user.id || 1;
+      const response = await apiFetch(`/api/applications`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
           user_id: userId,
           post_id: postId,
@@ -202,6 +200,3 @@ export default function SavedJobs() {
     </DashboardLayout>
   );
 }
-
-
-

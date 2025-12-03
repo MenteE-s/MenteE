@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import IndividualNavbar from "../../components/layout/IndividualNavbar";
 import Card from "../../components/ui/Card";
-import { getSidebarItems } from "../../utils/auth";
+import { getSidebarItems, apiFetch } from "../../utils/auth";
 import { formatDate } from "../../utils/timezone";
 
 export default function AppliedJobs() {
@@ -23,8 +23,9 @@ export default function AppliedJobs() {
 
   const fetchAppliedJobs = async () => {
     try {
-      const userId = 1; // TODO: Get from user context
-      const response = await fetch(`/api/applied-jobs/user/${userId}`);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const userId = user.id || 1;
+      const response = await apiFetch(`/api/applied-jobs/user/${userId}`);
       if (response.ok) {
         const data = await response.json();
         setAppliedJobs(data);
@@ -172,6 +173,3 @@ export default function AppliedJobs() {
     </DashboardLayout>
   );
 }
-
-
-

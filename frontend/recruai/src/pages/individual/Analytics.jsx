@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import IndividualNavbar from "../../components/layout/IndividualNavbar";
 import Card from "../../components/ui/Card";
-import { getSidebarItems } from "../../utils/auth";
+import { getSidebarItems, apiFetch } from "../../utils/auth";
 import { formatDate } from "../../utils/timezone";
 
 export default function Analytics() {
@@ -24,9 +24,7 @@ export default function Analytics() {
 
   const fetchInterviewAnalytics = async () => {
     try {
-      const response = await fetch(`/api/users/${userId}/analytics`, {
-        credentials: "include",
-      });
+      const response = await apiFetch(`/api/users/${userId}/analytics`);
       if (response.ok) {
         const data = await response.json();
         setAnalytics(data);
@@ -383,6 +381,3 @@ export default function Analytics() {
     </DashboardLayout>
   );
 }
-
-
-
