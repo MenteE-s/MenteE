@@ -54,12 +54,24 @@ if database_url:
         # Initialize the shared db instance with this app
         db.init_app(app)
         
-        # Import models from src.models (they use the same db from extensions)
+        # Import ALL models from src.models so db.create_all() creates all tables
         with app.app_context():
-            from src.models import User, Interview
+            from src.models import (
+                User, Organization, TeamMember, Interview, InterviewAnalysis,
+                Post, Application, SavedJob, Message, ProfileSection,
+                Experience, Education, Skill, Project, Publication, Award,
+                Certification, Language, VolunteerExperience, Reference,
+                HobbyInterest, ProfessionalMembership, Patent, CourseTraining,
+                SocialMediaLink, KeyAchievement, Conference, SpeakingEngagement,
+                License, AIInterviewAgent, ConversationMemory, SystemIssue
+            )
             
             app.User = User
             app.Interview = Interview
+            
+            # Auto-create all tables if they don't exist
+            db.create_all()
+            print("✅ Database tables created/verified")
         
         print("✅ SQLAlchemy and models initialized successfully")
         
@@ -289,6 +301,51 @@ def test_db():
         return jsonify({
             "status": "database_error", 
             "error": str(e)
+        }), 500
+
+@app.route('/debug/tables')
+def debug_tables():
+    """Debug endpoint to list all database tables and test queries"""
+    try:
+        # List all tables
+        result = db.session.execute(db.text("""
+            SELECT table_name FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            ORDER BY table_name
+        """))
+        tables = [row[0] for row in result.fetchall()]
+        
+        # Test specific model queries
+        test_results = {}
+        try:
+            from src.models import Application
+            test_results['applications_count'] = Application.query.count()
+        except Exception as e:
+            test_results['applications_error'] = str(e)
+        
+        try:
+            from src.models import SavedJob
+            test_results['saved_jobs_count'] = SavedJob.query.count()
+        except Exception as e:
+            test_results['saved_jobs_error'] = str(e)
+            
+        try:
+            from src.models import Post
+            test_results['posts_count'] = Post.query.count()
+        except Exception as e:
+            test_results['posts_error'] = str(e)
+        
+        return jsonify({
+            "status": "ok",
+            "tables": tables,
+            "test_results": test_results
+        })
+    except Exception as e:
+        import traceback
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "traceback": traceback.format_exc()
         }), 500
 
 @app.route('/api/v1/chat', methods=['POST'])
