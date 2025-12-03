@@ -27,12 +27,21 @@ app.config['JWT_HEADER_NAME'] = 'Authorization'
 app.config['JWT_HEADER_TYPE'] = 'Bearer'
 
 # Configure CORS to allow the Vercel frontend
-CORS(app, resources={r"/api/*": {"origins": [
+# Cover both /api/* and /api/v1/* paths since frontend may call either
+CORS(app, resources={
+    r"/api/*": {"origins": [
     "http://localhost:3000",
     "http://localhost:3001", 
     "https://recruai-nine.vercel.app",
     "https://*.vercel.app"
-]}}, supports_credentials=True)
+    ]},
+    r"/api/v1/*": {"origins": [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "https://recruai-nine.vercel.app",
+        "https://*.vercel.app"
+    ]}
+}, supports_credentials=True)
 
 # Initialize JWT
 jwt = JWTManager(app)
@@ -409,9 +418,8 @@ blueprint_error = None
 blueprint_registered = False
 try:
     from src.blueprints.recruai.routes.api import api_bp
-    # Register under both /api and /api/v1 to support existing frontend calls
+    # Register once under /api
     app.register_blueprint(api_bp, url_prefix="/api")
-    app.register_blueprint(api_bp, url_prefix="/api/v1")
     print("✅ RecruAI API blueprint registered")
     blueprint_registered = True
 except Exception as e:
@@ -419,6 +427,13 @@ except Exception as e:
     print(f"⚠️ Could not register RecruAI blueprint: {e}")
     import traceback
     traceback.print_exc()
+
+# Provide a safe redirect from /api/v1/* to /api/* to support existing frontend
+@app.route('/api/v1/<path:subpath>', methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
+def api_v1_redirect(subpath):
+    # Use 307 to preserve method and body on redirect
+    from flask import redirect
+    return redirect(f"/api/{subpath}", code=307)
 
 @app.route('/api/v1/debug/blueprint')
 def debug_blueprint():
