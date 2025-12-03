@@ -1,8 +1,7 @@
-from flask import Blueprint, jsonify, request
+from flask import jsonify, request
+from .. import api_bp
 from extensions import db
 from app.models import AIInterviewAgent, User
-
-api_bp = Blueprint('ind_ai_agents', __name__)
 
 
 @api_bp.route('/users/<int:user_id>/ai-agents', methods=['GET'])

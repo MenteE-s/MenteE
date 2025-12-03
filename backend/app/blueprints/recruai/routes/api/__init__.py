@@ -9,24 +9,15 @@ from . import auth  # noqa: E402, F401
 from . import users  # noqa: E402, F401
 from . import interviews  # noqa: E402, F401
 
-# Import individual user routes (saved_jobs, applied_jobs, etc.)
+# Import ind package (triggers ind/__init__.py -> ind/routes.py -> all ind route modules)
 try:
-    from .ind import saved_jobs  # noqa: E402, F401
-    from .ind import applied_jobs  # noqa: E402, F401
-    from .ind import analytics as ind_analytics  # noqa: E402, F401
-    from .ind import ai_agents as ind_ai_agents  # noqa: E402, F401
-    from .ind import practice  # noqa: E402, F401
+    from . import ind  # noqa: E402, F401
 except ImportError as e:
     print(f"Warning: Could not import ind submodule: {e}")
 
-# Import organization routes
+# Import org package (triggers org/__init__.py -> org/routes.py -> all org route modules)
 try:
-    from .org import organizations  # noqa: E402, F401
-    from .org import posts  # noqa: E402, F401
-    from .org import applications  # noqa: E402, F401
-    from .org import analytics as org_analytics  # noqa: E402, F401
-    from .org import ai_agents as org_ai_agents  # noqa: E402, F401
-    from .org import uploads  # noqa: E402, F401
+    from . import org  # noqa: E402, F401
 except ImportError as e:
     print(f"Warning: Could not import org submodule: {e}")
 

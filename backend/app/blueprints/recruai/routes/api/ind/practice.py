@@ -1,9 +1,8 @@
 from datetime import timedelta, datetime
-from flask import Blueprint, jsonify, request
+from flask import jsonify, request
+from .. import api_bp
 from extensions import db
 from app.models import Interview, AIInterviewAgent, User
-
-api_bp = Blueprint('ind_practice', __name__)
 
 
 @api_bp.route('/practice/sessions', methods=['POST'])
