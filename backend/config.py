@@ -29,7 +29,8 @@ class Config:
     # if the frontend is configured to use them). These can be overridden via
     # environment variables for flexibility.
     # Accept tokens from headers for SPAs, and cookies when configured.
-    JWT_TOKEN_LOCATION = os.getenv("JWT_TOKEN_LOCATION", "headers,cookies").split(",")
+    # Prefer headers by default to avoid CSRF complexity in local dev
+    JWT_TOKEN_LOCATION = os.getenv("JWT_TOKEN_LOCATION", "headers").split(",")
     JWT_COOKIE_SECURE = os.getenv("JWT_COOKIE_SECURE", "0") == "1"
     JWT_COOKIE_SAMESITE = os.getenv("JWT_COOKIE_SAMESITE", "Lax")
     # protect cookies with CSRF double-submit cookie if true

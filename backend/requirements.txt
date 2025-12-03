@@ -12,3 +12,7 @@ openai
 groq
 requests
 supabase
+playwright>=1.40.0
+PyPDF2>=3.0.0
+langchain
+langchain-groq

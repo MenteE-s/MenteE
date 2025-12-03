@@ -19,6 +19,9 @@ from app.blueprints.cvai.routes import auth  # type: ignore
 from app.blueprints.cvai.routes.profile import profile_bp as cvai_profile_bp  # type: ignore
 from app.blueprints.cvai.routes.organization import bp as cvai_organization_bp  # type: ignore
 from app.blueprints.cvai.routes.recruting import bp as cvai_recruting_bp  # type: ignore
+# Import PPTAI blueprint for AI presentation generator
+from app.blueprints.pptai.routes.api import bp as pptai_bp  # type: ignore
+from app.blueprints.pptai.routes.auth import bp as pptai_auth_bp  # type: ignore
 
 # Initialize Supabase client for storage
 supabase_client = None
@@ -57,6 +60,23 @@ def create_app(config_object: object | None = None):
 	migrate.init_app(app, db)
 	jwt.init_app(app)
 
+	# JWT error handlers to surface clear causes instead of opaque 422
+	@jwt.unauthorized_loader
+	def unauthorized_callback(reason):  # type: ignore
+		return jsonify({"error": "unauthorized", "message": reason}), 401
+
+	@jwt.invalid_token_loader
+	def invalid_token_callback(reason):  # type: ignore
+		return jsonify({"error": "invalid_token", "message": reason}), 401
+
+	@jwt.expired_token_loader
+	def expired_token_callback(header, payload):  # type: ignore
+		return jsonify({"error": "token_expired"}), 401
+
+	@jwt.revoked_token_loader
+	def revoked_token_callback(header, payload):  # type: ignore
+		return jsonify({"error": "token_revoked"}), 401
+
 	# Background scheduler (non-critical)
 	try:
 		from scheduler import init_scheduler  # type: ignore
@@ -85,6 +105,9 @@ def create_app(config_object: object | None = None):
 	app.register_blueprint(cvai_organization_bp, url_prefix="/api/cvai")
 	# Register CVAI recruiting routes
 	app.register_blueprint(cvai_recruting_bp, url_prefix="/api/cvai")
+	# Register PPTAI blueprint
+	app.register_blueprint(pptai_bp, url_prefix="/api/pptai")
+	app.register_blueprint(pptai_auth_bp, url_prefix="/api/pptai/auth")
 
 	@app.route('/uploads/<path:filename>')
 	def uploaded_file(filename):  # type: ignore

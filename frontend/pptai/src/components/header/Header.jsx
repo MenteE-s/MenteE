@@ -1,26 +1,40 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { authAPI } from "../../utils/api";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const isAuthenticated = authAPI.isAuthenticated();
 
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Features", path: "/#features" },
+    { name: "PPTAI", path: "/pptai" },
     { name: "Chat", path: "/chat" },
     { name: "Blog", path: "/blog" },
     { name: "About", path: "/about" },
     { name: "Contact", path: "/contact" },
   ];
 
-  const authItems = [
-    { name: "Login", path: "/login" },
-    { name: "Sign Up", path: "/signup", isCTA: true },
-  ];
+  const authItems = isAuthenticated
+    ? [{ name: "Logout", action: "logout" }]
+    : [
+        { name: "Login", path: "/login" },
+        { name: "Sign Up", path: "/signup", isCTA: true },
+      ];
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleAuthAction = (action) => {
+    if (action === "logout") {
+      authAPI.logout();
+      navigate("/");
+    }
+    setIsMobileMenuOpen(false);
   };
 
   const isActiveLink = (path) => {
@@ -62,19 +76,29 @@ export default function Header() {
 
         {/* Desktop Auth Buttons */}
         <div className="hidden md:flex gap-3 items-center">
-          {authItems.map((item) => (
-            <Link
-              key={item.name}
-              to={item.path}
-              className={
-                item.isCTA
-                  ? "bg-linear-to-r from-[#1d9bf0] to-[#27b96f] text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:scale-105 shadow-md"
-                  : "text-slate-600 hover:text-slate-900 font-medium px-4 py-2 rounded-lg transition-all duration-200 hover:bg-slate-100"
-              }
-            >
-              {item.name}
-            </Link>
-          ))}
+          {authItems.map((item) =>
+            item.action ? (
+              <button
+                key={item.name}
+                onClick={() => handleAuthAction(item.action)}
+                className="text-slate-600 hover:text-slate-900 font-medium px-4 py-2 rounded-lg transition-all duration-200 hover:bg-slate-100"
+              >
+                {item.name}
+              </button>
+            ) : (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={
+                  item.isCTA
+                    ? "bg-linear-to-r from-[#1d9bf0] to-[#27b96f] text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:scale-105 shadow-md"
+                    : "text-slate-600 hover:text-slate-900 font-medium px-4 py-2 rounded-lg transition-all duration-200 hover:bg-slate-100"
+                }
+              >
+                {item.name}
+              </Link>
+            )
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -120,20 +144,30 @@ export default function Header() {
               </Link>
             ))}
             <div className="pt-4 mt-4 border-t border-slate-100 flex flex-col gap-3">
-              {authItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={
-                    item.isCTA
-                      ? "bg-linear-to-r from-[#1d9bf0] to-[#27b96f] text-white py-3 px-6 rounded-xl font-semibold text-center transition-all duration-200 hover:shadow-lg"
-                      : "text-slate-600 hover:text-slate-900 font-medium py-3 px-4 rounded-lg transition-all duration-200 hover:bg-slate-100 text-center"
-                  }
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
+              {authItems.map((item) =>
+                item.action ? (
+                  <button
+                    key={item.name}
+                    onClick={() => handleAuthAction(item.action)}
+                    className="text-slate-600 hover:text-slate-900 font-medium py-3 px-4 rounded-lg transition-all duration-200 hover:bg-slate-100 text-center"
+                  >
+                    {item.name}
+                  </button>
+                ) : (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    className={
+                      item.isCTA
+                        ? "bg-linear-to-r from-[#1d9bf0] to-[#27b96f] text-white py-3 px-6 rounded-xl font-semibold text-center transition-all duration-200 hover:shadow-lg"
+                        : "text-slate-600 hover:text-slate-900 font-medium py-3 px-4 rounded-lg transition-all duration-200 hover:bg-slate-100 text-center"
+                    }
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                )
+              )}
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { authAPI } from "../../utils/api";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -8,6 +9,9 @@ export default function Signup() {
     password: "",
     confirmPassword: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -15,13 +19,39 @@ export default function Signup() {
       ...prevState,
       [name]: value,
     }));
+    if (error) setError("");
   };
 
-  const handleSubmit = (e) => {
+  const validateForm = () => {
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real application, you would send this data to your backend
-    console.log("Signup submitted:", formData);
-    alert("Signup functionality would be implemented in a real application");
+    if (!validateForm()) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const { confirmPassword, ...userData } = formData;
+      const response = await authAPI.register(userData);
+      console.log("Signup successful:", response);
+      // Redirect to chat or login
+      navigate("/chat");
+    } catch (err) {
+      setError(err.message || "Signup failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -38,6 +68,12 @@ export default function Signup() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
             <div>
               <label
                 htmlFor="name"
@@ -52,7 +88,8 @@ export default function Signup() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                disabled={loading}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50"
                 placeholder="John Doe"
               />
             </div>
@@ -71,7 +108,8 @@ export default function Signup() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                disabled={loading}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50"
                 placeholder="your.email@example.com"
               />
             </div>
@@ -90,7 +128,8 @@ export default function Signup() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                disabled={loading}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50"
                 placeholder="••••••••"
               />
             </div>
@@ -109,14 +148,20 @@ export default function Signup() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                disabled={loading}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50"
                 placeholder="••••••••"
               />
             </div>
 
             <div>
               <label className="flex items-start">
-                <input type="checkbox" className="mr-2 mt-1" required />
+                <input
+                  type="checkbox"
+                  className="mr-2 mt-1"
+                  required
+                  disabled={loading}
+                />
                 <span className="text-sm text-slate-600">
                   I agree to the{" "}
                   <a
@@ -138,9 +183,10 @@ export default function Signup() {
 
             <button
               type="submit"
-              className="w-full bg-linear-to-r from-primary-600 to-accent-700 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all"
+              disabled={loading}
+              className="w-full bg-linear-to-r from-primary-600 to-accent-700 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Account
+              {loading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
 

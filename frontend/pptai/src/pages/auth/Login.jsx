@@ -1,11 +1,25 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { authAPI } from "../../utils/api";
 
 export default function Login() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || "/chat";
+
+  useEffect(() => {
+    // Redirect if already authenticated
+    if (authAPI.isAuthenticated()) {
+      navigate(from, { replace: true });
+    }
+  }, [navigate, from]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -13,13 +27,24 @@ export default function Login() {
       ...prevState,
       [name]: value,
     }));
+    if (error) setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real application, you would send this data to your backend
-    console.log("Login submitted:", formData);
-    alert("Login functionality would be implemented in a real application");
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await authAPI.login(formData);
+      console.log("Login successful:", response);
+      // Redirect to the intended page or chat
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError(err.message || "Login failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,6 +59,12 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
             <div>
               <label
                 htmlFor="email"
@@ -48,7 +79,8 @@ export default function Login() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                disabled={loading}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50"
                 placeholder="your.email@example.com"
               />
             </div>
@@ -67,14 +99,15 @@ export default function Login() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                disabled={loading}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50"
                 placeholder="••••••••"
               />
             </div>
 
             <div className="flex items-center justify-between">
               <label className="flex items-center">
-                <input type="checkbox" className="mr-2" />
+                <input type="checkbox" className="mr-2" disabled={loading} />
                 Remember me
               </label>
               <a href="#" className="text-primary-500 hover:text-primary-600">
@@ -84,9 +117,10 @@ export default function Login() {
 
             <button
               type="submit"
-              className="w-full bg-linear-to-r from-primary-600 to-accent-700 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all"
+              disabled={loading}
+              className="w-full bg-linear-to-r from-primary-600 to-accent-700 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {loading ? "Signing In..." : "Sign In"}
             </button>
           </form>
 

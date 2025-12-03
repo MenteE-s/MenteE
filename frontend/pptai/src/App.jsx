@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/header/Header";
 import Footer from "./components/footer/Footer";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 // Pages
 import Home from "./pages/home/Home";
@@ -28,7 +29,15 @@ function App() {
             <Route path="/blog" element={<Blog />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/chat" element={<Chat />} />
+
+            <Route
+              path="/chat"
+              element={
+                <ProtectedRoute>
+                  <Chat />
+                </ProtectedRoute>
+              }
+            />
             {/* Add more routes as needed */}
           </Routes>
         </main>

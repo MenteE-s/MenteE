@@ -16,6 +16,15 @@ except Exception:  # pragma: no cover
     def update_expired_interviews():  # fallback no-op
         return 0
 
+def update_expired_interviews_with_context():
+    """
+    Wrapper for update_expired_interviews to ensure it runs within an application context.
+    """
+    from app import create_app
+    app = create_app()
+    with app.app_context():
+        update_expired_interviews()
+
 scheduler = BackgroundScheduler()
 _SCHEDULER_STARTED = False  # module-level flag
 
@@ -39,7 +48,7 @@ def init_scheduler():
 
     try:
         scheduler.add_job(
-            func=update_expired_interviews,
+            func=update_expired_interviews_with_context,
             trigger=IntervalTrigger(minutes=5),
             id="update_expired_interviews",
             name="Update expired interviews to completed status",

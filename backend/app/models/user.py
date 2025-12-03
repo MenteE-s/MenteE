@@ -34,6 +34,8 @@ class User(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     interviews = db.relationship("Interview", back_populates="user", cascade="all, delete-orphan")
+    presentations = db.relationship("Presentation", back_populates="user", cascade="all, delete-orphan")
+    pptai_files = db.relationship("PPTAIFile", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User {self.email}>"
