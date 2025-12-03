@@ -7,11 +7,30 @@ import {
   FiActivity,
   FiTrendingUp,
   FiDollarSign,
+  FiBarChart2,
+  FiFileText,
+  FiCalendar,
+  FiClock,
+  FiBookmark,
+  FiBell,
+  FiSettings,
 } from "react-icons/fi";
+
+// Sidebar items with correct format for Sidebar component
+const sidebarItems = [
+  { name: "Dashboard", link: "/dashboard", icon: FiBarChart2 },
+  { name: "Job Posts", link: "/jobs", icon: FiFileText },
+  { name: "Candidates", link: "/candidates", icon: FiUsers },
+  { name: "Interviews", link: "/interviews", icon: FiCalendar },
+  { name: "Pipeline", link: "/pipeline", icon: FiClock },
+  { name: "Saved", link: "/saved", icon: FiBookmark },
+  { name: "Alerts", link: "/alerts", icon: FiBell },
+  { name: "Settings", link: "/settings", icon: FiSettings },
+];
 
 export default function Dashboard() {
   return (
-    <DashboardLayout>
+    <DashboardLayout sidebarItems={sidebarItems}>
       {/* Top hero summary */}
       <div className="mb-6">
         <div className="rounded-2xl p-6 bg-gradient-to-br from-indigo-600/80 via-purple-600/60 to-cyan-500/60 text-white shadow-lg">
