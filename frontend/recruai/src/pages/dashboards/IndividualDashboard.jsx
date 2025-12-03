@@ -86,17 +86,29 @@ export default function IndividualDashboard() {
       let savedData = [];
 
       if (interviewsResponse.ok) {
-        const data = await interviewsResponse.json();
-        interviewsData = data.interviews;
-        setInterviews(interviewsData.slice(0, 5)); // Show only recent 5
+        try {
+          const data = await interviewsResponse.json();
+          interviewsData = data.interviews || [];
+          setInterviews(interviewsData.slice(0, 5)); // Show only recent 5
+        } catch (e) {
+          console.log("Could not parse interviews response");
+        }
       }
 
       if (appliedResponse.ok) {
-        appliedData = await appliedResponse.json();
+        try {
+          appliedData = await appliedResponse.json();
+        } catch (e) {
+          console.log("Could not parse applied jobs response");
+        }
       }
 
       if (savedResponse.ok) {
-        savedData = await savedResponse.json();
+        try {
+          savedData = await savedResponse.json();
+        } catch (e) {
+          console.log("Could not parse saved jobs response");
+        }
       }
 
       // Calculate stats from real data

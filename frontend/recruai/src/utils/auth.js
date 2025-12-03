@@ -92,6 +92,7 @@ export const authAPI = {
       if (data.access_token) {
         localStorage.setItem("token", data.access_token);
         localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("isAuthenticated", "true");
       }
 
       return data;
@@ -134,6 +135,7 @@ export const authAPI = {
   logout: () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("isAuthenticated");
   },
 
   getToken: () => {
