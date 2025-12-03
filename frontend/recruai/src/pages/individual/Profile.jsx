@@ -5,34 +5,33 @@ import Card from "../../components/ui/Card";
 import { getSidebarItems, getUploadUrl , apiFetch } from "../../utils/auth";
 import {
   FiPlus,
-  FiX,
-  FiEdit2,
-  FiAward,
-  FiBook,
-  FiCode,
-  FiFileText,
-  FiUsers,
-  FiBriefcase,
-  FiCheck,
-  FiX as FiXIcon,
-  FiTrash2,
-  FiCamera,
-  FiUser,
-} from "react-icons/fi";
+    try {
+      const endpoint = buildProfileEndpoint(type, item.id);
 
-// Date formatting utility
-const formatDate = (dateString, format = "year") => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "";
+      if (!endpoint) {
+        setError("Unsupported section type");
+        setShowDeleteConfirm(null);
+        return;
+      }
 
-  switch (format) {
-    case "full":
-      return date.toLocaleDateString();
-    case "year":
-    default:
-      return date.getFullYear().toString();
-  }
+      const response = await apiFetch(endpoint, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        setProfileData((prev) => ({
+          ...prev,
+          [type]: prev[type].filter((_, i) => i !== index),
+        }));
+        setShowDeleteConfirm(null);
+      } else {
+        setError("Failed to delete item");
+      }
+  if (!route) return null;
+  return id
+    ? `/api/v1/profile/${route}/${id}`
+    : `/api/v1/profile/${route}`;
 };
 
 // Modal Component
@@ -1529,58 +1528,27 @@ export default function Profile() {
     }
 
     try {
-      let endpoint = "";
-      if (type === "experiences")
-        endpoint = `/api/profile/experiences/${item.id}`;
-      else if (type === "educations")
-        endpoint = `/api/profile/educations/${item.id}`;
-      else if (type === "skills") endpoint = `/api/profile/skills/${item.id}`;
-      else if (type === "projects")
-        endpoint = `/api/profile/projects/${item.id}`;
-      else if (type === "publications")
-        endpoint = `/api/profile/publications/${item.id}`;
-      else if (type === "awards") endpoint = `/api/profile/awards/${item.id}`;
-      else if (type === "certifications")
-        endpoint = `/api/profile/certifications/${item.id}`;
-      else if (type === "languages")
-        endpoint = `/api/profile/languages/${item.id}`;
-      else if (type === "volunteerExperiences")
-        endpoint = `/api/profile/volunteer-experiences/${item.id}`;
-      else if (type === "references")
-        endpoint = `/api/profile/references/${item.id}`;
-      else if (type === "hobbyInterests")
-        endpoint = `/api/profile/hobby-interests/${item.id}`;
-      else if (type === "professionalMemberships")
-        endpoint = `/api/profile/professional-memberships/${item.id}`;
-      else if (type === "patents") endpoint = `/api/profile/patents/${item.id}`;
-      else if (type === "courseTrainings")
-        endpoint = `/api/profile/course-trainings/${item.id}`;
-      else if (type === "socialMediaLinks")
-        endpoint = `/api/profile/social-media-links/${item.id}`;
-      else if (type === "keyAchievements")
-        endpoint = `/api/profile/key-achievements/${item.id}`;
-      else if (type === "conferences")
-        endpoint = `/api/profile/conferences/${item.id}`;
-      else if (type === "speakingEngagements")
-        endpoint = `/api/profile/speaking-engagements/${item.id}`;
-      else if (type === "licenses")
-        endpoint = `/api/profile/licenses/${item.id}`;
+      const endpoint = buildProfileEndpoint(type, item.id);
 
-      if (endpoint) {
-        const response = await fetch(endpoint, {
-          method: "DELETE",
-          credentials: "include",
-        });
+      if (!endpoint) {
+        setError("Unsupported section type");
+        setShowDeleteConfirm(null);
+        return;
+      }
 
-        if (response.ok) {
-          setProfileData((prev) => ({
-            ...prev,
-            [type]: prev[type].filter((_, i) => i !== index),
-          }));
-          setShowDeleteConfirm(null);
-        } else {
-          setError("Failed to delete item");
-        }
+      const response = await apiFetch(endpoint, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        setProfileData((prev) => ({
+          ...prev,
+          [type]: prev[type].filter((_, i) => i !== index),
+        }));
+        setShowDeleteConfirm(null);
+      } else {
+        setError("Failed to delete item");
       }
     } catch (error) {
       console.error("Error deleting item:", error);
@@ -1596,40 +1564,20 @@ export default function Profile() {
 
     try {
       const { type, data: existingItem } = editingItem;
-      let endpoint = `/api/profile/${type}`;
-      let method = existingItem ? "PUT" : "POST";
-      let body = itemData;
+      const method = existingItem ? "PUT" : "POST";
+      const endpoint = existingItem?.id
+        ? buildProfileEndpoint(type, existingItem.id)
+        : buildProfileEndpoint(type);
 
-      if (existingItem && existingItem.id) {
-        if (type === "experiences") endpoint += `/${existingItem.id}`;
-        else if (type === "educations") endpoint += `/${existingItem.id}`;
-        else if (type === "skills") endpoint += `/${existingItem.id}`;
-        else if (type === "projects") endpoint += `/${existingItem.id}`;
-        else if (type === "publications") endpoint += `/${existingItem.id}`;
-        else if (type === "awards") endpoint += `/${existingItem.id}`;
-        else if (type === "certifications") endpoint += `/${existingItem.id}`;
-        else if (type === "languages") endpoint += `/${existingItem.id}`;
-        else if (type === "volunteerExperiences")
-          endpoint += `/${existingItem.id}`;
-        else if (type === "references") endpoint += `/${existingItem.id}`;
-        else if (type === "hobbyInterests") endpoint += `/${existingItem.id}`;
-        else if (type === "professionalMemberships")
-          endpoint += `/${existingItem.id}`;
-        else if (type === "patents") endpoint += `/${existingItem.id}`;
-        else if (type === "courseTrainings") endpoint += `/${existingItem.id}`;
-        else if (type === "socialMediaLinks") endpoint += `/${existingItem.id}`;
-        else if (type === "keyAchievements") endpoint += `/${existingItem.id}`;
-        else if (type === "conferences") endpoint += `/${existingItem.id}`;
-        else if (type === "speakingEngagements")
-          endpoint += `/${existingItem.id}`;
-        else if (type === "licenses") endpoint += `/${existingItem.id}`;
+      if (!endpoint) {
+        setError("Unsupported section type");
+        return;
       }
 
-      const response = await fetch(endpoint, {
+      const response = await apiFetch(endpoint, {
         method,
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(body),
+        body: JSON.stringify(itemData),
       });
 
       if (response.ok) {
