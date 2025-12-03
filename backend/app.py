@@ -361,11 +361,8 @@ def debug_jwt_config():
 
 # Register the RecruAI API blueprint to get all the additional endpoints
 # The blueprint routes are under /api (without /v1)
-# Use importlib to avoid conflict between app.py and app/ package
 try:
-    import importlib
-    api_module = importlib.import_module('app.blueprints.recruai.routes.api')
-    api_bp = api_module.api_bp
+    from src.blueprints.recruai.routes.api import api_bp
     app.register_blueprint(api_bp, url_prefix="/api")
     print("✅ RecruAI API blueprint registered")
 except Exception as e:
