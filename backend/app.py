@@ -276,6 +276,24 @@ def create_interview():
 def api_health():
     return jsonify({"status": "api_healthy"})
 
+@app.route('/api/v1/debug/routes')
+def debug_routes():
+    """Debug endpoint to list all registered routes"""
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append({
+            "endpoint": rule.endpoint,
+            "methods": list(rule.methods - {'HEAD', 'OPTIONS'}),
+            "path": rule.rule
+        })
+    # Filter to show /api/ routes
+    api_routes = [r for r in routes if r['path'].startswith('/api/')]
+    return jsonify({
+        "total_routes": len(routes),
+        "api_routes_count": len(api_routes),
+        "sample_api_routes": api_routes[:20]
+    })
+
 @app.route('/test-db')
 def test_db():
     if not db:
