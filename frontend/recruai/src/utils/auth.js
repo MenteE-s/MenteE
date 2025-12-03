@@ -173,28 +173,31 @@ export const apiFetch = async (endpoint, options = {}) => {
 };
 
 // Sidebar items helper expected by organization pages
+// Returns items in the format expected by Sidebar component: { name, link, icon }
 export const getSidebarItems = () => [
-  { key: "dashboard", label: "Dashboard", icon: FiBarChart2 },
-  { key: "jobs", label: "Job Posts", icon: FiFileText },
-  { key: "candidates", label: "Candidates", icon: FiUsers },
-  { key: "interviews", label: "Interviews", icon: FiCalendar },
-  { key: "pipeline", label: "Pipeline", icon: FiClock },
-  { key: "saved", label: "Saved", icon: FiBookmark },
-  { key: "alerts", label: "Alerts", icon: FiBell },
-  { key: "settings", label: "Settings", icon: FiSettings },
+  { name: "Dashboard", link: "/dashboard", icon: FiBarChart2 },
+  { name: "Browse Jobs", link: "/jobs", icon: FiFileText },
+  { name: "Applied Jobs", link: "/jobs/applied", icon: FiUsers },
+  { name: "Saved Jobs", link: "/jobs/saved", icon: FiBookmark },
+  { name: "Interviews", link: "/interviews/upcoming", icon: FiCalendar },
+  { name: "Practice", link: "/practice", icon: FiClock },
+  { name: "Analytics", link: "/analytics", icon: FiBell },
+  { name: "Settings", link: "/settings", icon: FiSettings },
 ];
 
 // Token verification utility expected by organization pages
 export const verifyTokenWithServer = async () => {
   const token = localStorage.getItem("token");
-  if (!token) return false;
+  if (!token) return null;
   try {
     const res = await fetch(API_ENDPOINTS.AUTH.ME, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return res.ok;
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.user; // Return the actual user object with role
   } catch {
-    return false;
+    return null;
   }
 };
 
