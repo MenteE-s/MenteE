@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import OrganizationNavbar from "../../components/layout/OrganizationNavbar";
 import Card from "../../components/ui/Card";
-import { getSidebarItems , apiFetch } from "../../utils/auth";
+import { getSidebarItems, apiFetch } from "../../utils/auth";
 import { formatDate } from "../../utils/timezone";
 
 export default function Pipeline() {
@@ -303,7 +303,3 @@ export default function Pipeline() {
     </DashboardLayout>
   );
 }
-
-
-
-

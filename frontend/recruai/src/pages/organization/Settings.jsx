@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import OrganizationNavbar from "../../components/layout/OrganizationNavbar";
 import Card from "../../components/ui/Card";
-import { getSidebarItems, verifyTokenWithServer , apiFetch } from "../../utils/auth";
+import {
+  getSidebarItems,
+  verifyTokenWithServer,
+  apiFetch,
+} from "../../utils/auth";
 import TimezoneSelector from "../../components/ui/TimezoneSelector";
 
 export default function OrganizationSettings() {
@@ -56,12 +60,15 @@ export default function OrganizationSettings() {
         vision: organization.vision,
         social_media_links: organization.social_media_links,
       };
-      const res = await apiFetch(`/api/v1/organizations/${organization.id}/profile`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      });
+      const res = await apiFetch(
+        `/api/v1/organizations/${organization.id}/profile`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(payload),
+        }
+      );
       if (res.ok) {
         const updatedOrg = await res.json();
         setOrganization(updatedOrg);
@@ -449,7 +456,3 @@ export default function OrganizationSettings() {
     </DashboardLayout>
   );
 }
-
-
-
-

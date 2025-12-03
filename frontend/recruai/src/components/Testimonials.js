@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import techcorpLogo from '../assets/logos/techcorp.svg';
 
 const Testimonials = () => {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
@@ -22,7 +23,7 @@ const Testimonials = () => {
       name: "Michael Rodriguez",
       role: "HR Director",
       company: "TechCorp",
-      companyLogo: "https://via.placeholder.com/120x40/4F46E5/white?text=TechCorp",
+      companyLogo: techcorpLogo,
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
       content: "As an HR professional, RecruAI has revolutionized our recruitment process. We've reduced hiring time by 40% and significantly improved candidate quality. It's a game-changer for organizations.",
       rating: 5,

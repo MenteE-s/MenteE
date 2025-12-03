@@ -2,7 +2,11 @@ import React, { useCallback, useState, useEffect } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import OrganizationNavbar from "../../components/layout/OrganizationNavbar";
 import Card from "../../components/ui/Card";
-import { getSidebarItems, verifyTokenWithServer, apiFetch } from "../../utils/auth";
+import {
+  getSidebarItems,
+  verifyTokenWithServer,
+  apiFetch,
+} from "../../utils/auth";
 import { useToast } from "../../components/ui/ToastContext";
 import { formatDate } from "../../utils/timezone";
 
@@ -208,12 +212,15 @@ export default function AIAgents() {
     if (!testingAgent || !testMessage.trim()) return;
 
     try {
-      const response = await apiFetch(`/api/v1/ai-agents/${testingAgent.id}/test`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ message: testMessage }),
-      });
+      const response = await apiFetch(
+        `/api/v1/ai-agents/${testingAgent.id}/test`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ message: testMessage }),
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -587,7 +594,3 @@ export default function AIAgents() {
     </DashboardLayout>
   );
 }
-
-
-
-
