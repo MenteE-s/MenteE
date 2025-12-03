@@ -4,7 +4,7 @@ import DashboardLayout from "../../components/layout/DashboardLayout";
 import IndividualNavbar from "../../components/layout/IndividualNavbar";
 import StatCard from "../../components/ui/StatCard";
 import Card from "../../components/ui/Card";
-import { getSidebarItems, verifyTokenWithServer } from "../../utils/auth";
+import { getSidebarItems, verifyTokenWithServer, API_ENDPOINTS, authAPI } from "../../utils/auth";
 import { formatDate } from "../../utils/timezone";
 import {
   FiUsers,
@@ -44,23 +44,33 @@ export default function IndividualDashboard() {
     try {
       const user = await verifyTokenWithServer();
       const userId = user && user.id ? user.id : 1; // Default to 1 if not authenticated
+      const token = authAPI.getToken();
 
-      // Fetch interviews
+      // Fetch interviews from the actual API
       const interviewsResponse = await fetch(
-        `/api/interviews?user_id=${userId}`,
+        API_ENDPOINTS.INTERVIEWS.LIST,
         {
-          credentials: "include",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
 
-      // Fetch applied jobs
-      const appliedResponse = await fetch(`/api/applied-jobs/user/${userId}`, {
-        credentials: "include",
+      // Fetch applied jobs - using placeholder since endpoint may not exist yet
+      const appliedResponse = await fetch(`${API_ENDPOINTS.BASE}/api/v1/applied-jobs/user/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
-      // Fetch saved jobs
-      const savedResponse = await fetch(`/api/saved-jobs/user/${userId}`, {
-        credentials: "include",
+      // Fetch saved jobs - using placeholder since endpoint may not exist yet
+      const savedResponse = await fetch(`${API_ENDPOINTS.BASE}/api/v1/saved-jobs/user/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       let interviewsData = [];
