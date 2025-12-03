@@ -6,16 +6,17 @@ from src.models import User, Experience, Education, Skill, Project, Publication,
 import os
 from werkzeug.utils import secure_filename
 
+
+def _current_user_id() -> int:
+    return int(get_jwt_identity())
+
 # Get full profile for a specific user (for organization admins viewing team members)
 @api_bp.route('/profile/user/<int:user_id>', methods=['GET'])
 @jwt_required()
 def get_user_profile(user_id):
     """Get full profile data for a specific user (self-access or organization admin access)"""
-    current_user_id = get_jwt_identity()
-
-    # Get current user
     try:
-        current_user_id_int = int(current_user_id)
+        current_user_id_int = _current_user_id()
         current_user = User.query.get(current_user_id_int)
     except (ValueError, TypeError):
         return jsonify({"error": "invalid user identity"}), 400
@@ -100,9 +101,8 @@ def get_user_profile(user_id):
 @jwt_required()
 def upload_profile_picture():
     """Upload a profile picture for the current user"""
-    user_id = get_jwt_identity()
     try:
-        user_id_int = int(user_id)
+        user_id_int = _current_user_id()
         user = User.query.get(user_id_int)
     except (ValueError, TypeError):
         return jsonify({"error": "invalid user identity"}), 400

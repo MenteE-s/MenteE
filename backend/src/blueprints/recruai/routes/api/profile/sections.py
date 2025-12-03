@@ -5,11 +5,15 @@ from extensions import db
 from src.models import ProfileSection
 import json
 
+
+def _current_user_id() -> int:
+    return int(get_jwt_identity())
+
 @api_bp.route('/profile/sections', methods=['GET'])
 @jwt_required()
 def get_profile_sections():
     """Get all profile sections for the current user"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
 
     # Get all profile sections
     sections = ProfileSection.query.filter_by(user_id=user_id).order_by(ProfileSection.order_index).all()
@@ -22,7 +26,7 @@ def get_profile_sections():
 @jwt_required()
 def save_profile_section():
     """Save or update a profile section"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
     data = request.get_json()
 
     if not data or 'section_type' not in data or 'section_data' not in data:
@@ -60,7 +64,7 @@ def save_profile_section():
 @jwt_required()
 def delete_profile_section(section_id):
     """Delete a profile section"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
 
     section = ProfileSection.query.filter_by(id=section_id, user_id=user_id).first()
     if not section:

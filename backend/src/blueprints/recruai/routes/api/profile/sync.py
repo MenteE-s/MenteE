@@ -10,12 +10,16 @@ from src.models import (
 )
 import requests
 
+
+def _current_user_id() -> int:
+    return int(get_jwt_identity())
+
 # Sync profile data from CVAI to Recrui
 @api_bp.route('/profile/sync-from-cvai', methods=['POST'])
 @jwt_required()
 def sync_from_cvai():
     """Sync profile data from CVAI to Recrui"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
 
     try:
         # Get CVAI profile data

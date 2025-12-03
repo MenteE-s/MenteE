@@ -5,12 +5,16 @@ from extensions import db
 from src.models import Education, Skill, Language
 from datetime import datetime
 
+
+def _current_user_id() -> int:
+    return int(get_jwt_identity())
+
 # Education endpoints
 @api_bp.route('/profile/educations', methods=['GET'])
 @jwt_required()
 def get_educations():
     """Get all education records for the current user"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
     educations = Education.query.filter_by(user_id=user_id).order_by(Education.start_date.desc()).all()
     return jsonify({'educations': [edu.to_dict() for edu in educations]}), 200
 
@@ -18,7 +22,7 @@ def get_educations():
 @jwt_required()
 def create_education():
     """Create a new education record"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
     data = request.get_json()
 
     if not data or 'degree' not in data or 'school' not in data:
@@ -49,7 +53,7 @@ def create_education():
 @jwt_required()
 def update_education(edu_id):
     """Update an education record"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
     education = Education.query.filter_by(id=edu_id, user_id=user_id).first()
 
     if not education:
@@ -67,7 +71,7 @@ def update_education(edu_id):
 @jwt_required()
 def delete_education(edu_id):
     """Delete an education record"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
     education = Education.query.filter_by(id=edu_id, user_id=user_id).first()
 
     if not education:
@@ -82,7 +86,7 @@ def delete_education(edu_id):
 @jwt_required()
 def get_skills():
     """Get all skills for the current user"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
     skills = Skill.query.filter_by(user_id=user_id).all()
     return jsonify({'skills': [skill.to_dict() for skill in skills]}), 200
 
@@ -90,7 +94,7 @@ def get_skills():
 @jwt_required()
 def create_skill():
     """Create a new skill"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
     data = request.get_json()
 
     if not data or 'name' not in data:
@@ -112,7 +116,7 @@ def create_skill():
 @jwt_required()
 def update_skill(skill_id):
     """Update a skill"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
     skill = Skill.query.filter_by(id=skill_id, user_id=user_id).first()
 
     if not skill:
@@ -130,7 +134,7 @@ def update_skill(skill_id):
 @jwt_required()
 def delete_skill(skill_id):
     """Delete a skill"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
     skill = Skill.query.filter_by(id=skill_id, user_id=user_id).first()
 
     if not skill:
@@ -145,7 +149,7 @@ def delete_skill(skill_id):
 @jwt_required()
 def get_languages():
     """Get all languages for the current user"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
     languages = Language.query.filter_by(user_id=user_id).all()
     return jsonify({'languages': [lang.to_dict() for lang in languages]}), 200
 
@@ -153,7 +157,7 @@ def get_languages():
 @jwt_required()
 def create_language():
     """Create a new language"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
     data = request.get_json()
 
     if not data or 'name' not in data:
@@ -174,7 +178,7 @@ def create_language():
 @jwt_required()
 def update_language(lang_id):
     """Update a language"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
     language = Language.query.filter_by(id=lang_id, user_id=user_id).first()
 
     if not language:
@@ -192,7 +196,7 @@ def update_language(lang_id):
 @jwt_required()
 def delete_language(lang_id):
     """Delete a language"""
-    user_id = get_jwt_identity()
+    user_id = _current_user_id()
     language = Language.query.filter_by(id=lang_id, user_id=user_id).first()
 
     if not language:

@@ -27,6 +27,15 @@ app.config['JWT_TOKEN_LOCATION'] = ['headers']
 app.config['JWT_HEADER_NAME'] = 'Authorization'
 app.config['JWT_HEADER_TYPE'] = 'Bearer'
 
+# Guarantee CORS responses include the credentials flag for API routes.
+@app.after_request
+def ensure_cors_credentials(response):
+    if request.path.startswith(('/api/', '/api_v1/', '/api')):
+        response.headers.pop('Access-Control-Allow-Credentials', None)
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+    return response
+
+
 # Configure CORS to allow the Vercel frontend
 # Cover both /api/* and /api/v1/* paths since frontend may call either
 CORS(app, resources={
@@ -43,16 +52,6 @@ CORS(app, resources={
         "https://*.vercel.app"
     ]}
 }, supports_credentials=True)
-
-
-@app.after_request
-def ensure_cors_credentials(response):
-    """Guarantee CORS responses include the credentials flag for API routes."""
-    if request.path.startswith(('/api/', '/api_v1/', '/api')):
-        # Remove any existing values to avoid "true, true" duplicates
-        response.headers.pop('Access-Control-Allow-Credentials', None)
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
-    return response
 
 # Initialize JWT
 jwt = JWTManager(app)
