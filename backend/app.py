@@ -442,7 +442,14 @@ def _duplicate_api_routes_to_v1(app):
             continue
         # Register the new rule with same methods excluding HEAD/OPTIONS (Flask will handle OPTIONS via CORS)
         methods = list(rule.methods) if rule.methods else None
-        app.add_url_rule(v1_path, endpoint=v1_endpoint, view_func=view_func, methods=methods)
+        if methods:
+            methods = [m for m in methods if m not in {'OPTIONS'}]
+        app.add_url_rule(
+            v1_path,
+            endpoint=v1_endpoint,
+            view_func=view_func,
+            methods=methods,
+        )
 
 # After blueprint registration, duplicate routes to /api/v1/*
 try:
