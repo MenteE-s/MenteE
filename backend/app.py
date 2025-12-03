@@ -49,6 +49,8 @@ CORS(app, resources={
 def ensure_cors_credentials(response):
     """Guarantee CORS responses include the credentials flag for API routes."""
     if request.path.startswith(('/api/', '/api_v1/', '/api')):
+        # Remove any existing values to avoid "true, true" duplicates
+        response.headers.pop('Access-Control-Allow-Credentials', None)
         response.headers['Access-Control-Allow-Credentials'] = 'true'
     return response
 
