@@ -4,11 +4,7 @@ import DashboardLayout from "../../components/layout/DashboardLayout";
 import IndividualNavbar from "../../components/layout/IndividualNavbar";
 import StatCard from "../../components/ui/StatCard";
 import Card from "../../components/ui/Card";
-import {
-  getSidebarItems,
-  API_ENDPOINTS,
-  authAPI,
-} from "../../utils/auth";
+import { getSidebarItems, API_ENDPOINTS, authAPI } from "../../utils/auth";
 import { formatDate } from "../../utils/timezone";
 import {
   FiUsers,
