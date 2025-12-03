@@ -428,12 +428,28 @@ except Exception as e:
     import traceback
     traceback.print_exc()
 
-# Provide a safe redirect from /api/v1/* to /api/* to support existing frontend
-@app.route('/api/v1/<path:subpath>', methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
-def api_v1_redirect(subpath):
-    # Use 307 to preserve method and body on redirect
-    from flask import redirect
-    return redirect(f"/api/{subpath}", code=307)
+def _duplicate_api_routes_to_v1(app):
+    """Duplicate all /api/* routes under /api/v1/* without redirect, to satisfy CORS preflights."""
+    # Build a list first to avoid modifying the map while iterating
+    api_rules = [rule for rule in app.url_map.iter_rules() if rule.rule.startswith('/api/')]
+    for rule in api_rules:
+        v1_path = rule.rule.replace('/api/', '/api/v1/', 1)
+        # Create a unique endpoint name to avoid collision
+        v1_endpoint = f"{rule.endpoint}_v1"
+        # Fetch the original view function
+        view_func = app.view_functions.get(rule.endpoint)
+        if not view_func:
+            continue
+        # Register the new rule with same methods excluding HEAD/OPTIONS (Flask will handle OPTIONS via CORS)
+        methods = list(rule.methods) if rule.methods else None
+        app.add_url_rule(v1_path, endpoint=v1_endpoint, view_func=view_func, methods=methods)
+
+# After blueprint registration, duplicate routes to /api/v1/*
+try:
+    _duplicate_api_routes_to_v1(app)
+    print("✅ Duplicated /api routes under /api/v1 for compatibility")
+except Exception as e:
+    print(f"⚠️ Could not duplicate /api routes to /api/v1: {e}")
 
 @app.route('/api/v1/debug/blueprint')
 def debug_blueprint():
