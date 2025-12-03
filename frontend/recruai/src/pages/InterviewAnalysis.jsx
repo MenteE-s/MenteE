@@ -4,7 +4,7 @@ import DashboardLayout from "../components/layout/DashboardLayout";
 import IndividualNavbar from "../components/layout/IndividualNavbar";
 import OrganizationNavbar from "../components/layout/OrganizationNavbar";
 import Card from "../components/ui/Card";
-import { getSidebarItems } from "../utils/auth";
+import { getSidebarItems, apiFetch } from "../utils/auth";
 import { formatDateTime } from "../utils/timezone";
 
 const InterviewAnalysis = () => {
@@ -33,9 +33,12 @@ const InterviewAnalysis = () => {
       setLoading(true);
 
       // Fetch interview details
-      const interviewResponse = await fetch(`/api/interviews/${interviewId}`, {
-        credentials: "include",
-      });
+      const interviewResponse = await apiFetch(
+        `/api/v1/interviews/${interviewId}`,
+        {
+          credentials: "include",
+        }
+      );
 
       if (!interviewResponse.ok) {
         throw new Error("Failed to fetch interview");
@@ -88,11 +91,14 @@ const InterviewAnalysis = () => {
 
     setGeneratingAnalysis(true);
     try {
-      const response = await fetch(`/api/interviews/${interviewId}/analyze`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
+      const response = await apiFetch(
+        `/api/v1/interviews/${interviewId}/analyze`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }
+      );
 
       if (response.ok) {
         const result = await response.json();

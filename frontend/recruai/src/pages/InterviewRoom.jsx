@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import TextInterview from "../components/interviews/TextInterview";
 import { formatDateTime } from "../utils/timezone";
+import { apiFetch } from "../utils/auth";
 
 const InterviewRoom = () => {
   const { interviewId } = useParams();
@@ -32,7 +33,7 @@ const InterviewRoom = () => {
 
   const fetchAiUser = async () => {
     try {
-      const response = await fetch("/api/ai/user", {
+      const response = await apiFetch("/api/v1/ai/user", {
         credentials: "include",
       });
       if (response.ok) {
@@ -68,7 +69,7 @@ const InterviewRoom = () => {
 
   const fetchInterview = async () => {
     try {
-      const response = await fetch(`/api/interviews/${interviewId}`, {
+      const response = await apiFetch(`/api/v1/interviews/${interviewId}`, {
         credentials: "include",
       });
 
@@ -102,9 +103,12 @@ const InterviewRoom = () => {
 
   const loadMessages = async () => {
     try {
-      const response = await fetch(`/api/interviews/${interviewId}/messages`, {
-        credentials: "include",
-      });
+      const response = await apiFetch(
+        `/api/v1/interviews/${interviewId}/messages`,
+        {
+          credentials: "include",
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -147,16 +151,19 @@ const InterviewRoom = () => {
 
     try {
       // Save user message to database
-      const response = await fetch(`/api/interviews/${interviewId}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          user_id: userId,
-          content: message,
-          message_type: "text",
-        }),
-      });
+      const response = await apiFetch(
+        `/api/v1/interviews/${interviewId}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            user_id: userId,
+            content: message,
+            message_type: "text",
+          }),
+        }
+      );
 
       if (response.ok) {
         // Reload messages to get the updated list
@@ -183,7 +190,7 @@ const InterviewRoom = () => {
           if (aiResponse.ok) {
             const aiData = await aiResponse.json();
             // Save AI response to database
-            await fetch(`/api/interviews/${interviewId}/messages`, {
+            await apiFetch(`/api/v1/interviews/${interviewId}/messages`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               credentials: "include",
@@ -223,16 +230,19 @@ const InterviewRoom = () => {
 
     try {
       // Save interviewer response to database
-      const response = await fetch(`/api/interviews/${interviewId}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          user_id: userId, // Interviewer user ID
-          content: message,
-          message_type: "interviewer_response",
-        }),
-      });
+      const response = await apiFetch(
+        `/api/v1/interviews/${interviewId}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            user_id: userId, // Interviewer user ID
+            content: message,
+            message_type: "interviewer_response",
+          }),
+        }
+      );
 
       if (response.ok) {
         await loadMessages();

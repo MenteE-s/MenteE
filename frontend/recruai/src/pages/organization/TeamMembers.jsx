@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import OrganizationNavbar from "../../components/layout/OrganizationNavbar";
 import Card from "../../components/ui/Card";
-import { getSidebarItems } from "../../utils/auth";
+import { getSidebarItems , apiFetch } from "../../utils/auth";
 import {
   FiPlus,
   FiEdit2,
@@ -70,7 +70,7 @@ export default function TeamMembers() {
   useEffect(() => {
     const getOrgId = async () => {
       try {
-        const res = await fetch("/api/auth/me", { credentials: "include" });
+        const res = await apiFetch("/api/v1/auth/me", { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
           if (data.user && data.user.organization_id) {
@@ -631,3 +631,7 @@ export default function TeamMembers() {
     </DashboardLayout>
   );
 }
+
+
+
+

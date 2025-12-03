@@ -4,7 +4,12 @@ import DashboardLayout from "../../components/layout/DashboardLayout";
 import IndividualNavbar from "../../components/layout/IndividualNavbar";
 import StatCard from "../../components/ui/StatCard";
 import Card from "../../components/ui/Card";
-import { getSidebarItems, verifyTokenWithServer, API_ENDPOINTS, authAPI } from "../../utils/auth";
+import {
+  getSidebarItems,
+  verifyTokenWithServer,
+  API_ENDPOINTS,
+  authAPI,
+} from "../../utils/auth";
 import { formatDate } from "../../utils/timezone";
 import {
   FiUsers,
@@ -47,31 +52,34 @@ export default function IndividualDashboard() {
       const token = authAPI.getToken();
 
       // Fetch interviews from the actual API
-      const interviewsResponse = await fetch(
-        API_ENDPOINTS.INTERVIEWS.LIST,
+      const interviewsResponse = await fetch(API_ENDPOINTS.INTERVIEWS.LIST, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      // Fetch applied jobs - using placeholder since endpoint may not exist yet
+      const appliedResponse = await fetch(
+        `${API_ENDPOINTS.BASE}/api/v1/applied-jobs/user/${userId}`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
 
-      // Fetch applied jobs - using placeholder since endpoint may not exist yet
-      const appliedResponse = await fetch(`${API_ENDPOINTS.BASE}/api/v1/applied-jobs/user/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
       // Fetch saved jobs - using placeholder since endpoint may not exist yet
-      const savedResponse = await fetch(`${API_ENDPOINTS.BASE}/api/v1/saved-jobs/user/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const savedResponse = await fetch(
+        `${API_ENDPOINTS.BASE}/api/v1/saved-jobs/user/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       let interviewsData = [];
       let appliedData = [];

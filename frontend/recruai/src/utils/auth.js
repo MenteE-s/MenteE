@@ -146,6 +146,30 @@ export const authAPI = {
   },
 };
 
+// Centralized API fetch helper - use this for all API calls
+export const apiFetch = async (endpoint, options = {}) => {
+  const token = localStorage.getItem("token");
+  const url = endpoint.startsWith("http")
+    ? endpoint
+    : `${API_BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...options.headers,
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, {
+    ...options,
+    headers,
+  });
+
+  return response;
+};
+
 // Sidebar items helper expected by organization pages
 export const getSidebarItems = () => [
   { key: "dashboard", label: "Dashboard", icon: FiBarChart2 },

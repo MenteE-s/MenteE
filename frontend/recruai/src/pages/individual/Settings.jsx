@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import IndividualNavbar from "../../components/layout/IndividualNavbar";
 import Card from "../../components/ui/Card";
-import { getSidebarItems } from "../../utils/auth";
+import { getSidebarItems, apiFetch } from "../../utils/auth";
 import TimezoneSelector from "../../components/ui/TimezoneSelector";
 
 export default function Settings() {
@@ -18,7 +18,7 @@ export default function Settings() {
     // Fetch current user ID
     const fetchUser = async () => {
       try {
-        const response = await fetch("/api/auth/me", {
+        const response = await apiFetch("/api/v1/auth/me", {
           credentials: "include",
         });
         if (response.ok) {

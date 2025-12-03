@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import IndividualNavbar from "../../components/layout/IndividualNavbar";
 import Card from "../../components/ui/Card";
-import { getSidebarItems, getUploadUrl } from "../../utils/auth";
+import { getSidebarItems, getUploadUrl , apiFetch } from "../../utils/auth";
 import {
   FiPlus,
   FiX,
@@ -1355,7 +1355,7 @@ export default function Profile() {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const response = await fetch("/api/auth/me", {
+        const response = await apiFetch("/api/v1/auth/me", {
           credentials: "include",
         });
         if (response.ok) {
@@ -1392,32 +1392,32 @@ export default function Profile() {
           speakRes,
           licRes,
         ] = await Promise.all([
-          fetch("/api/profile/sections", { credentials: "include" }),
-          fetch("/api/profile/experiences", { credentials: "include" }),
-          fetch("/api/profile/educations", { credentials: "include" }),
-          fetch("/api/profile/skills", { credentials: "include" }),
-          fetch("/api/profile/projects", { credentials: "include" }),
-          fetch("/api/profile/publications", { credentials: "include" }),
-          fetch("/api/profile/awards", { credentials: "include" }),
-          fetch("/api/profile/certifications", { credentials: "include" }),
-          fetch("/api/profile/languages", { credentials: "include" }),
-          fetch("/api/profile/volunteer-experiences", {
+          apiFetch("/api/v1/profile/sections", { credentials: "include" }),
+          apiFetch("/api/v1/profile/experiences", { credentials: "include" }),
+          apiFetch("/api/v1/profile/educations", { credentials: "include" }),
+          apiFetch("/api/v1/profile/skills", { credentials: "include" }),
+          apiFetch("/api/v1/profile/projects", { credentials: "include" }),
+          apiFetch("/api/v1/profile/publications", { credentials: "include" }),
+          apiFetch("/api/v1/profile/awards", { credentials: "include" }),
+          apiFetch("/api/v1/profile/certifications", { credentials: "include" }),
+          apiFetch("/api/v1/profile/languages", { credentials: "include" }),
+          apiFetch("/api/v1/profile/volunteer-experiences", {
             credentials: "include",
           }),
-          fetch("/api/profile/references", { credentials: "include" }),
-          fetch("/api/profile/hobby-interests", { credentials: "include" }),
-          fetch("/api/profile/professional-memberships", {
+          apiFetch("/api/v1/profile/references", { credentials: "include" }),
+          apiFetch("/api/v1/profile/hobby-interests", { credentials: "include" }),
+          apiFetch("/api/v1/profile/professional-memberships", {
             credentials: "include",
           }),
-          fetch("/api/profile/patents", { credentials: "include" }),
-          fetch("/api/profile/course-trainings", { credentials: "include" }),
-          fetch("/api/profile/social-media-links", { credentials: "include" }),
-          fetch("/api/profile/key-achievements", { credentials: "include" }),
-          fetch("/api/profile/conferences", { credentials: "include" }),
-          fetch("/api/profile/speaking-engagements", {
+          apiFetch("/api/v1/profile/patents", { credentials: "include" }),
+          apiFetch("/api/v1/profile/course-trainings", { credentials: "include" }),
+          apiFetch("/api/v1/profile/social-media-links", { credentials: "include" }),
+          apiFetch("/api/v1/profile/key-achievements", { credentials: "include" }),
+          apiFetch("/api/v1/profile/conferences", { credentials: "include" }),
+          apiFetch("/api/v1/profile/speaking-engagements", {
             credentials: "include",
           }),
-          fetch("/api/profile/licenses", { credentials: "include" }),
+          apiFetch("/api/v1/profile/licenses", { credentials: "include" }),
         ]);
 
         const [
@@ -1707,7 +1707,7 @@ export default function Profile() {
     setError(null);
 
     try {
-      const response = await fetch("/api/profile/sections", {
+      const response = await apiFetch("/api/v1/profile/sections", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -1737,7 +1737,7 @@ export default function Profile() {
     setError(null);
 
     try {
-      const response = await fetch("/api/profile", {
+      const response = await apiFetch("/api/v1/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -1783,7 +1783,7 @@ export default function Profile() {
       const formData = new FormData();
       formData.append("profile_picture", file);
 
-      const response = await fetch("/api/profile/upload-profile-picture", {
+      const response = await apiFetch("/api/v1/profile/upload-profile-picture", {
         method: "POST",
         credentials: "include",
         body: formData,
@@ -3262,3 +3262,7 @@ export default function Profile() {
     </DashboardLayout>
   );
 }
+
+
+
+

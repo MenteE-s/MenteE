@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import OrganizationNavbar from "../../components/layout/OrganizationNavbar";
-import { getSidebarItems } from "../../utils/auth";
+import { getSidebarItems , apiFetch } from "../../utils/auth";
 import {
   FiX,
   FiMail,
@@ -41,7 +41,7 @@ export default function UserProfile() {
   const fetchProfileData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/profile/user/${userId}`, {
+      const response = await apiFetch(`/api/v1/profile/user/${userId}`, {
         credentials: "include",
       });
 
@@ -693,3 +693,7 @@ export default function UserProfile() {
     </DashboardLayout>
   );
 }
+
+
+
+

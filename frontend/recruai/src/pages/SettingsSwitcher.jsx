@@ -32,3 +32,4 @@ export default function SettingsSwitcher() {
   if (role === "organization") return <OrganizationSettings />;
   return <IndividualSettings />;
 }
+

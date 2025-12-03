@@ -35,3 +35,4 @@ export default function DashboardSwitcher() {
   if (role === "organization") return <OrganizationDashboard />;
   return <IndividualDashboard />;
 }
+

@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import OrganizationNavbar from "../../components/layout/OrganizationNavbar";
 import Card from "../../components/ui/Card";
-import { getSidebarItems, getUploadUrl } from "../../utils/auth";
+import { getSidebarItems, getUploadUrl, apiFetch } from "../../utils/auth";
 import {
   FiX,
   FiEdit2,
@@ -186,7 +186,9 @@ export default function OrganizationProfile() {
     const loadProfileData = async () => {
       try {
         // First get user to determine permissions
-        const userRes = await fetch("/api/auth/me", { credentials: "include" });
+        const userRes = await apiFetch("/api/v1/auth/me", {
+          credentials: "include",
+        });
         if (!userRes.ok) throw new Error("Failed to get user");
 
         const userData = await userRes.json();
@@ -204,7 +206,7 @@ export default function OrganizationProfile() {
         setCanEdit(!orgId || parseInt(orgId) === currentUserOrgId);
 
         // Get organization profile
-        const orgRes = await fetch(`/api/organizations/${targetOrgId}`, {
+        const orgRes = await apiFetch(`/api/v1/organizations/${targetOrgId}`, {
           credentials: "include",
         });
         if (!orgRes.ok) throw new Error("Failed to load organization profile");
@@ -240,12 +242,14 @@ export default function OrganizationProfile() {
     setError(null);
 
     try {
-      const userRes = await fetch("/api/auth/me", { credentials: "include" });
+      const userRes = await apiFetch("/api/v1/auth/me", {
+        credentials: "include",
+      });
       const userData = await userRes.json();
       const currentUserOrgId = userData.user.organization_id;
       const targetOrgId = orgId || currentUserOrgId;
 
-      const response = await fetch(`/api/organizations/${targetOrgId}`, {
+      const response = await apiFetch(`/api/v1/organizations/${targetOrgId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -283,7 +287,9 @@ export default function OrganizationProfile() {
     setError(null);
 
     try {
-      const userRes = await fetch("/api/auth/me", { credentials: "include" });
+      const userRes = await apiFetch("/api/v1/auth/me", {
+        credentials: "include",
+      });
       const userData = await userRes.json();
       const currentUserOrgId = userData.user.organization_id;
       const targetOrgId = orgId || currentUserOrgId;
@@ -331,7 +337,9 @@ export default function OrganizationProfile() {
     setError(null);
 
     try {
-      const userRes = await fetch("/api/auth/me", { credentials: "include" });
+      const userRes = await apiFetch("/api/v1/auth/me", {
+        credentials: "include",
+      });
       const userData = await userRes.json();
       const currentUserOrgId = userData.user.organization_id;
       const targetOrgId = orgId || currentUserOrgId;
@@ -378,7 +386,9 @@ export default function OrganizationProfile() {
     setError(null);
 
     try {
-      const userRes = await fetch("/api/auth/me", { credentials: "include" });
+      const userRes = await apiFetch("/api/v1/auth/me", {
+        credentials: "include",
+      });
       const userData = await userRes.json();
       const currentUserOrgId = userData.user.organization_id;
       const targetOrgId = orgId || currentUserOrgId;
@@ -431,7 +441,9 @@ export default function OrganizationProfile() {
     setError(null);
 
     try {
-      const userRes = await fetch("/api/auth/me", { credentials: "include" });
+      const userRes = await apiFetch("/api/v1/auth/me", {
+        credentials: "include",
+      });
       const userData = await userRes.json();
       const currentUserOrgId = userData.user.organization_id;
       const targetOrgId = orgId || currentUserOrgId;

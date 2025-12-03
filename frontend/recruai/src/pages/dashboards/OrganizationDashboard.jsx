@@ -3,7 +3,7 @@ import DashboardLayout from "../../components/layout/DashboardLayout";
 import OrganizationNavbar from "../../components/layout/OrganizationNavbar";
 import StatCard from "../../components/ui/StatCard";
 import Card from "../../components/ui/Card";
-import { getSidebarItems } from "../../utils/auth";
+import { getSidebarItems, apiFetch } from "../../utils/auth";
 import {
   FiUsers,
   FiBarChart2,
@@ -49,10 +49,7 @@ export default function OrganizationDashboard() {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch("/api/auth/me", {
-        method: "GET",
-        credentials: "include",
-      });
+      const response = await apiFetch("/api/v1/auth/me");
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
@@ -64,7 +61,7 @@ export default function OrganizationDashboard() {
 
   const fetchDashboardStats = async () => {
     try {
-      const response = await fetch("/api/dashboard/stats");
+      const response = await apiFetch("/api/v1/dashboard/stats");
       if (response.ok) {
         const data = await response.json();
         setStats(data);
@@ -76,7 +73,7 @@ export default function OrganizationDashboard() {
 
   const fetchAnalyticsOverview = async () => {
     try {
-      const response = await fetch("/api/analytics/overview");
+      const response = await apiFetch("/api/v1/analytics/overview");
       if (response.ok) {
         const data = await response.json();
         setAnalytics(data);
