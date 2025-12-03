@@ -50,8 +50,8 @@ const InterviewAnalysis = () => {
       // Fetch analysis if interview is completed
       if (interviewData.status === "completed") {
         try {
-          const analysisResponse = await fetch(
-            `/api/interviews/${interviewId}/analysis`,
+          const analysisResponse = await apiFetch(
+            `/api/v1/interviews/${interviewId}/analysis`,
             {
               credentials: "include",
             }
@@ -67,8 +67,8 @@ const InterviewAnalysis = () => {
       }
 
       // Fetch messages
-      const messagesResponse = await fetch(
-        `/api/interviews/${interviewId}/messages`,
+      const messagesResponse = await apiFetch(
+        `/api/v1/interviews/${interviewId}/messages`,
         {
           credentials: "include",
         }

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import IndividualNavbar from "../../components/layout/IndividualNavbar";
 import Card from "../../components/ui/Card";
-import { getSidebarItems } from "../../utils/auth";
+import { getSidebarItems, apiFetch } from "../../utils/auth";
 import { formatDateTime, getRelativeTime } from "../../utils/timezone";
 
 export default function UpcomingInterviews() {
@@ -22,7 +22,7 @@ export default function UpcomingInterviews() {
   useEffect(() => {
     const fetchUpcomingInterviews = async () => {
       try {
-        const response = await apiFetch(`/api/interviews/upcoming`, {
+        const response = await apiFetch(`/api/v1/interviews/upcoming`, {
           credentials: "include",
         });
 

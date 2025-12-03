@@ -4,7 +4,7 @@ import DashboardLayout from "../../components/layout/DashboardLayout";
 import IndividualNavbar from "../../components/layout/IndividualNavbar";
 import StatCard from "../../components/ui/StatCard";
 import Card from "../../components/ui/Card";
-import { getSidebarItems, API_ENDPOINTS, authAPI } from "../../utils/auth";
+import { getSidebarItems, apiFetch, authAPI } from "../../utils/auth";
 import { formatDate } from "../../utils/timezone";
 import {
   FiUsers,
@@ -54,12 +54,7 @@ export default function IndividualDashboard() {
 
       // Fetch interviews from the actual API
       try {
-        const interviewsResponse = await fetch(API_ENDPOINTS.INTERVIEWS.LIST, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const interviewsResponse = await apiFetch(`/api/v1/interviews`);
         if (interviewsResponse.ok) {
           const data = await interviewsResponse.json();
           interviewsData = data.interviews || [];
@@ -69,18 +64,12 @@ export default function IndividualDashboard() {
         console.log("Could not fetch interviews:", e.message);
       }
 
-      // Fetch applied jobs - endpoint is under /api (not /api/v1)
+      // Fetch applied jobs
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const userId = user.id || 1;
-        const appliedResponse = await fetch(
-          `${API_ENDPOINTS.BASE}/api/applied-jobs/user/${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
+        const appliedResponse = await apiFetch(
+          `/api/v1/applied-jobs/user/${userId}`
         );
         if (appliedResponse.ok) {
           appliedData = await appliedResponse.json();
@@ -89,18 +78,12 @@ export default function IndividualDashboard() {
         console.log("Could not fetch applied jobs:", e.message);
       }
 
-      // Fetch saved jobs - endpoint is under /api (not /api/v1)
+      // Fetch saved jobs
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const userId = user.id || 1;
-        const savedResponse = await fetch(
-          `${API_ENDPOINTS.BASE}/api/saved-jobs/user/${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
+        const savedResponse = await apiFetch(
+          `/api/v1/saved-jobs/user/${userId}`
         );
         if (savedResponse.ok) {
           savedData = await savedResponse.json();

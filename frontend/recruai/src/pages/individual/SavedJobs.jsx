@@ -2,12 +2,7 @@ import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import IndividualNavbar from "../../components/layout/IndividualNavbar";
 import Card from "../../components/ui/Card";
-import {
-  getSidebarItems,
-  apiFetch,
-  API_ENDPOINTS,
-  authAPI,
-} from "../../utils/auth";
+import { getSidebarItems, apiFetch } from "../../utils/auth";
 import { formatDate } from "../../utils/timezone";
 
 export default function SavedJobs() {
@@ -30,7 +25,7 @@ export default function SavedJobs() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.id || 1;
-      const response = await apiFetch(`/api/saved-jobs/user/${userId}`);
+      const response = await apiFetch(`/api/v1/saved-jobs/user/${userId}`);
       if (response.ok) {
         const data = await response.json();
         setSavedJobs(data);
@@ -46,7 +41,7 @@ export default function SavedJobs() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.id || 1;
-      const response = await apiFetch(`/api/applications/user/${userId}`);
+      const response = await apiFetch(`/api/v1/applications/user/${userId}`);
       if (response.ok) {
         const data = await response.json();
         const appliedIds = new Set(data.map((app) => app.post_id));
@@ -59,7 +54,7 @@ export default function SavedJobs() {
 
   const handleUnsaveJob = async (savedId) => {
     try {
-      const response = await apiFetch(`/api/saved-jobs/${savedId}`, {
+      const response = await apiFetch(`/api/v1/saved-jobs/${savedId}`, {
         method: "DELETE",
       });
 
@@ -75,7 +70,7 @@ export default function SavedJobs() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.id || 1;
-      const response = await apiFetch(`/api/applications`, {
+      const response = await apiFetch(`/api/v1/applications`, {
         method: "POST",
         body: JSON.stringify({
           user_id: userId,

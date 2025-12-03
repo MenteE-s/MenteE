@@ -59,6 +59,15 @@ export const authAPI = {
 
       const data = await response.json();
       console.log("🎉 REGISTER SUCCESS:", data);
+
+      if (typeof window !== "undefined" && data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        if (data.user.role)
+          localStorage.setItem("authRole", data.user.role);
+        if (data.user.plan)
+          localStorage.setItem("authPlan", data.user.plan);
+      }
+
       return data;
     } catch (error) {
       console.error("❌ Registration error:", error);
@@ -89,10 +98,19 @@ export const authAPI = {
       console.log("🎉 LOGIN SUCCESS:", data);
 
       // Store token in localStorage
-      if (data.access_token) {
-        localStorage.setItem("token", data.access_token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        localStorage.setItem("isAuthenticated", "true");
+      if (typeof window !== "undefined") {
+        if (data.access_token) {
+          localStorage.setItem("token", data.access_token);
+          localStorage.setItem("isAuthenticated", "true");
+        }
+
+        if (data.user) {
+          localStorage.setItem("user", JSON.stringify(data.user));
+          if (data.user.role)
+            localStorage.setItem("authRole", data.user.role);
+          if (data.user.plan)
+            localStorage.setItem("authPlan", data.user.plan);
+        }
       }
 
       return data;
@@ -133,9 +151,12 @@ export const authAPI = {
   },
 
   logout: () => {
+    if (typeof window === "undefined") return;
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("authRole");
+    localStorage.removeItem("authPlan");
   },
 
   getToken: () => {
@@ -198,6 +219,11 @@ export const verifyTokenWithServer = async () => {
     });
     if (!res.ok) return null;
     const data = await res.json();
+    if (typeof window !== "undefined" && data.user) {
+      localStorage.setItem("user", JSON.stringify(data.user));
+      if (data.user.role) localStorage.setItem("authRole", data.user.role);
+      if (data.user.plan) localStorage.setItem("authPlan", data.user.plan);
+    }
     return data.user; // Return the actual user object with role
   } catch {
     return null;

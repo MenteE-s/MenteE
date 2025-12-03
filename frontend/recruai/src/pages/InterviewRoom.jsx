@@ -172,7 +172,7 @@ const InterviewRoom = () => {
         // Handle response based on interview mode
         if (interviewMode === "auto") {
           // Auto mode: Get AI response automatically (works even without specific ai_agent_id)
-          const aiResponse = await apiFetch(`/api/ai/chat`, {
+          const aiResponse = await apiFetch(`/api/v1/ai/chat`, {
             method: "POST",
             body: JSON.stringify({
               interview_id: interviewId,

@@ -25,7 +25,7 @@ export default function AppliedJobs() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.id || 1;
-      const response = await apiFetch(`/api/applied-jobs/user/${userId}`);
+      const response = await apiFetch(`/api/v1/applied-jobs/user/${userId}`);
       if (response.ok) {
         const data = await response.json();
         setAppliedJobs(data);

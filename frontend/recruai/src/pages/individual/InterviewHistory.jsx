@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import IndividualNavbar from "../../components/layout/IndividualNavbar";
 import Card from "../../components/ui/Card";
-import { getSidebarItems } from "../../utils/auth";
+import { getSidebarItems, apiFetch } from "../../utils/auth";
 import { formatDateTime as formatDateTimeTz } from "../../utils/timezone";
 
 export default function InterviewHistory() {
@@ -18,11 +18,24 @@ export default function InterviewHistory() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("history");
 
+  const getStoredUserId = () => {
+    if (typeof window === "undefined") return null;
+    try {
+      const stored = localStorage.getItem("user");
+      if (!stored) return null;
+      const parsed = JSON.parse(stored);
+      return parsed?.id || null;
+    } catch (err) {
+      console.error("Failed to parse stored user", err);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch interview history
-        const historyResponse = await fetch("/api/interviews/history", {
+        const historyResponse = await apiFetch("/api/v1/interviews/history", {
           credentials: "include",
         });
 
@@ -34,17 +47,19 @@ export default function InterviewHistory() {
         }
 
         // Fetch user analytics
-        const userId = 1; // TODO: Get from user context
-        const analyticsResponse = await fetch(
-          `/api/users/${userId}/analytics`,
-          {
-            credentials: "include",
-          }
-        );
+        const userId = getStoredUserId();
+        if (userId) {
+          const analyticsResponse = await apiFetch(
+            `/api/v1/users/${userId}/analytics`,
+            {
+              credentials: "include",
+            }
+          );
 
-        if (analyticsResponse.ok) {
-          const analyticsData = await analyticsResponse.json();
-          setAnalytics(analyticsData);
+          if (analyticsResponse.ok) {
+            const analyticsData = await analyticsResponse.json();
+            setAnalytics(analyticsData);
+          }
         }
         // Don't set error for analytics if it fails, as history might still work
       } catch (error) {

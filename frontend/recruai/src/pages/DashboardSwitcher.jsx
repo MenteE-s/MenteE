@@ -18,6 +18,10 @@ export default function DashboardSwitcher() {
         const user = await verifyTokenWithServer();
         if (!cancelled && user && user.role) {
           setRole(user.role);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("authRole", user.role);
+            if (user.plan) localStorage.setItem("authPlan", user.plan);
+          }
         }
       } catch (err) {
         // ignore network errors here; keep existing local role

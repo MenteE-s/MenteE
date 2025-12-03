@@ -16,7 +16,7 @@ export default function Analytics() {
 
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState(1); // TODO: Get from auth context
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     fetchInterviewAnalytics();
@@ -24,7 +24,14 @@ export default function Analytics() {
 
   const fetchInterviewAnalytics = async () => {
     try {
-      const response = await apiFetch(`/api/users/${userId}/analytics`);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const targetUserId = user.id;
+      if (!targetUserId) {
+        throw new Error("Missing user identifier");
+      }
+      setUserId(targetUserId);
+
+      const response = await apiFetch(`/api/v1/users/${targetUserId}/analytics`);
       if (response.ok) {
         const data = await response.json();
         setAnalytics(data);

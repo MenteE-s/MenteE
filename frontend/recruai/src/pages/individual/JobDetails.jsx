@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import IndividualNavbar from "../../components/layout/IndividualNavbar";
 import Card from "../../components/ui/Card";
-import { getSidebarItems } from "../../utils/auth";
+import { getSidebarItems, apiFetch } from "../../utils/auth";
 import { useToast } from "../../components/ui/ToastContext";
 import { formatDate } from "../../utils/timezone";
 
@@ -25,6 +25,19 @@ export default function JobDetails() {
   const [showApplyConfirm, setShowApplyConfirm] = useState(false);
   const [recommendedJobs, setRecommendedJobs] = useState([]);
 
+  const getStoredUserId = () => {
+    if (typeof window === "undefined") return null;
+    try {
+      const stored = localStorage.getItem("user");
+      if (!stored) return null;
+      const parsed = JSON.parse(stored);
+      return parsed?.id || null;
+    } catch (error) {
+      console.error("Failed to parse user from storage", error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     fetchJobDetails();
     checkSavedStatus();
@@ -39,7 +52,7 @@ export default function JobDetails() {
 
   const fetchJobDetails = async () => {
     try {
-      const response = await fetch(`/api/posts/${id}`);
+      const response = await apiFetch(`/api/v1/posts/${id}`);
       if (response.ok) {
         const data = await response.json();
         setJob(data);
@@ -63,9 +76,10 @@ export default function JobDetails() {
 
   const checkSavedStatus = async () => {
     try {
-      const userId = 1; // TODO: Get from user context
-      const response = await fetch(
-        `/api/saved-jobs/check?user_id=${userId}&post_id=${id}`
+      const userId = getStoredUserId();
+      if (!userId) return;
+      const response = await apiFetch(
+        `/api/v1/saved-jobs/check?user_id=${userId}&post_id=${id}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -78,8 +92,9 @@ export default function JobDetails() {
 
   const checkAppliedStatus = async () => {
     try {
-      const userId = 1; // TODO: Get from user context
-      const response = await fetch(`/api/applications/user/${userId}`);
+      const userId = getStoredUserId();
+      if (!userId) return;
+      const response = await apiFetch(`/api/v1/applications/user/${userId}`);
       if (response.ok) {
         const applications = await response.json();
         const hasApplied = applications.some(
@@ -94,7 +109,7 @@ export default function JobDetails() {
 
   const fetchRecommendedJobs = async () => {
     try {
-      const response = await fetch("/api/posts");
+      const response = await apiFetch("/api/v1/posts");
       if (response.ok) {
         const allJobs = await response.json();
         // Filter jobs: same company or same category, exclude current job, limit to 3
@@ -115,11 +130,13 @@ export default function JobDetails() {
 
   const handleSaveJob = async () => {
     try {
-      const userId = 1; // TODO: Get from user context
-      const response = await fetch("/api/saved-jobs", {
+      const userId = getStoredUserId();
+      if (!userId) {
+        showToast({ message: "Missing user session", type: "error" });
+        return;
+      }
+      const response = await apiFetch("/api/v1/saved-jobs", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ user_id: userId, post_id: parseInt(id) }),
       });
 
@@ -146,18 +163,18 @@ export default function JobDetails() {
 
   const handleUnsaveJob = async () => {
     try {
-      const userId = 1; // TODO: Get from user context
-      const response = await fetch(
-        `/api/saved-jobs/check?user_id=${userId}&post_id=${id}`
+      const userId = getStoredUserId();
+      if (!userId) return;
+      const response = await apiFetch(
+        `/api/v1/saved-jobs/check?user_id=${userId}&post_id=${id}`
       );
       if (response.ok) {
         const data = await response.json();
         if (data.saved_id) {
-          const deleteResponse = await fetch(
-            `/api/saved-jobs/${data.saved_id}`,
+          const deleteResponse = await apiFetch(
+            `/api/v1/saved-jobs/${data.saved_id}`,
             {
               method: "DELETE",
-              credentials: "include",
             }
           );
 
@@ -181,11 +198,13 @@ export default function JobDetails() {
 
   const handleApplyJob = async () => {
     try {
-      const userId = 1; // TODO: Get from user context
-      const response = await fetch("/api/applications", {
+      const userId = getStoredUserId();
+      if (!userId) {
+        showToast({ message: "Missing user session", type: "error" });
+        return;
+      }
+      const response = await apiFetch("/api/v1/applications", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
           user_id: userId,
           post_id: parseInt(id),

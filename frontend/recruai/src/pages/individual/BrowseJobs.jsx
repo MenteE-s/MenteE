@@ -17,7 +17,7 @@ export default function BrowseJobs() {
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [savedJobs, setSavedJobs] = useState(new Set());
+  const [savedJobs, setSavedJobs] = useState(new Map());
   const [appliedJobs, setAppliedJobs] = useState(new Set());
   const [showApplyConfirm, setShowApplyConfirm] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -40,7 +40,7 @@ export default function BrowseJobs() {
 
   const fetchJobs = async () => {
     try {
-      const response = await apiFetch(`/api/posts`);
+      const response = await apiFetch(`/api/v1/posts`);
       if (response.ok) {
         const data = await response.json();
         // Filter only active jobs
@@ -58,11 +58,13 @@ export default function BrowseJobs() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.id || 1;
-      const response = await apiFetch(`/api/saved-jobs/user/${userId}`);
+      const response = await apiFetch(`/api/v1/saved-jobs/user/${userId}`);
       if (response.ok) {
         const data = await response.json();
-        const savedIds = new Set(data.map((saved) => saved.post_id));
-        setSavedJobs(savedIds);
+        const savedEntries = new Map(
+          data.map((saved) => [saved.post_id, saved.id])
+        );
+        setSavedJobs(savedEntries);
       }
     } catch (error) {
       console.error("Error fetching saved jobs:", error);
@@ -73,7 +75,7 @@ export default function BrowseJobs() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.id || 1;
-      const response = await apiFetch(`/api/applications/user/${userId}`);
+      const response = await apiFetch(`/api/v1/applications/user/${userId}`);
       if (response.ok) {
         const data = await response.json();
         const appliedIds = new Set(data.map((app) => app.post_id));
@@ -112,13 +114,18 @@ export default function BrowseJobs() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.id || 1;
-      const response = await apiFetch(`/api/saved-jobs`, {
+      const response = await apiFetch(`/api/v1/saved-jobs`, {
         method: "POST",
         body: JSON.stringify({ user_id: userId, post_id: postId }),
       });
 
       if (response.ok) {
-        setSavedJobs((prev) => new Set([...prev, postId]));
+        const savedRecord = await response.json();
+        setSavedJobs((prev) => {
+          const updated = new Map(prev);
+          updated.set(postId, savedRecord.id);
+          return updated;
+        });
         showToast({
           message: "Job saved successfully!",
           type: "success",
@@ -138,24 +145,20 @@ export default function BrowseJobs() {
     }
   };
 
-  const handleUnsaveJob = async (savedId) => {
+  const handleUnsaveJob = async (savedId, postId) => {
     try {
-      const response = await apiFetch(`/api/saved-jobs/${savedId}`, {
+      const response = await apiFetch(`/api/v1/saved-jobs/${savedId}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
-        // Find the post_id for this saved job
-        const savedJob = await apiFetch(`/api/saved-jobs/user/1`)
-          .then((r) => r.json())
-          .then((data) => data.find((sj) => sj.id === savedId));
-        if (savedJob) {
-          setSavedJobs((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(savedJob.post_id);
-            return newSet;
-          });
-        }
+        setSavedJobs((prev) => {
+          const updated = new Map(prev);
+          if (postId) {
+            updated.delete(postId);
+          }
+          return updated;
+        });
       }
     } catch (error) {
       console.error("Error unsaving job:", error);
@@ -166,7 +169,7 @@ export default function BrowseJobs() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.id || 1;
-      const response = await apiFetch(`/api/applications`, {
+      const response = await apiFetch(`/api/v1/applications`, {
         method: "POST",
         body: JSON.stringify({
           user_id: userId,
@@ -413,14 +416,10 @@ export default function BrowseJobs() {
                   {savedJobs.has(job.id) ? (
                     <button
                       onClick={() => {
-                        // Find saved job ID - this is simplified
-                        fetch(
-                          `/api/saved-jobs/check?user_id=1&post_id=${job.id}`
-                        )
-                          .then((r) => r.json())
-                          .then((data) => {
-                            if (data.saved_id) handleUnsaveJob(data.saved_id);
-                          });
+                        const savedId = savedJobs.get(job.id);
+                        if (savedId) {
+                          handleUnsaveJob(savedId, job.id);
+                        }
                       }}
                       className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700"
                     >
