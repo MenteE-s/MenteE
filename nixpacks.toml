@@ -1,8 +1,11 @@
+# Railway deployment configuration - deploys from backend folder
 [phases.setup]
-aptPkgs = ["postgresql-client", "libpq-dev", "gcc"]
+nixPkgs = ["python311", "gcc"]
+aptPkgs = ["postgresql-client", "libpq-dev"]
 
 [phases.install]
-cmds = ["cd backend && pip install --no-cache-dir -r requirements.txt"]
+dependsOn = ["setup"]
+cmds = ["cd backend && python -m pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt"]
 
 [start]
-cmd = "cd backend && gunicorn app:app --bind 0.0.0.0:$PORT"
+cmd = "cd backend && python -m gunicorn app:app --bind 0.0.0.0:$PORT"
