@@ -305,6 +305,44 @@ def chat():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Debug routes
+@app.route('/api/v1/debug/token', methods=['POST'])
+def debug_token():
+    """Debug JWT token validation"""
+    try:
+        data = request.get_json()
+        token = data.get('token')
+        
+        if not token:
+            return jsonify({"error": "No token provided"}), 400
+        
+        from flask_jwt_extended import decode_token
+        decoded = decode_token(token)
+        
+        return jsonify({
+            "status": "token_valid",
+            "decoded": decoded,
+            "user_id": decoded.get('sub'),
+            "expires": decoded.get('exp')
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "status": "token_invalid", 
+            "error": str(e),
+            "error_type": type(e).__name__
+        }), 422
+
+@app.route('/api/v1/debug/jwt-config', methods=['GET'])
+def debug_jwt_config():
+    """Debug JWT configuration"""
+    return jsonify({
+        "jwt_secret_set": bool(app.config.get('JWT_SECRET_KEY')),
+        "jwt_secret_length": len(app.config.get('JWT_SECRET_KEY', '')),
+        "jwt_algorithm": "HS256",
+        "jwt_expires": str(app.config.get('JWT_ACCESS_TOKEN_EXPIRES'))
+    })
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
