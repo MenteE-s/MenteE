@@ -37,57 +37,26 @@ CORS(app, resources={r"/api/*": {"origins": [
 # Initialize JWT
 jwt = JWTManager(app)
 
+# Import db from extensions so blueprint routes use the same instance
+from extensions import db
+
 # Initialize database safely with multiple driver attempts
-db = None
 database_url = os.getenv('DATABASE_URL')
 db_error = None
 
 if database_url:
     try:
-        from flask_sqlalchemy import SQLAlchemy
-        
         # Use pg8000 driver (we know it works)
         modified_url = database_url.replace('postgresql://', 'postgresql+pg8000://')
         app.config['SQLALCHEMY_DATABASE_URI'] = modified_url
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         
-        db = SQLAlchemy()
+        # Initialize the shared db instance with this app
         db.init_app(app)
         
-        # Define models
+        # Import models from src.models (they use the same db from extensions)
         with app.app_context():
-            class User(db.Model):
-                id = db.Column(db.Integer, primary_key=True)
-                email = db.Column(db.String(120), unique=True, nullable=False)
-                password_hash = db.Column(db.String(128))
-                created_at = db.Column(db.DateTime, default=datetime.utcnow)
-                
-                def set_password(self, password):
-                    self.password_hash = generate_password_hash(password)
-                
-                def check_password(self, password):
-                    return check_password_hash(self.password_hash, password)
-                
-                def to_dict(self):
-                    return {
-                        'id': self.id,
-                        'email': self.email,
-                        'created_at': self.created_at.isoformat()
-                    }
-
-            class Interview(db.Model):
-                id = db.Column(db.Integer, primary_key=True)
-                user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-                title = db.Column(db.String(200), nullable=False)
-                created_at = db.Column(db.DateTime, default=datetime.utcnow)
-                
-                def to_dict(self):
-                    return {
-                        'id': self.id,
-                        'user_id': self.user_id,
-                        'title': self.title,
-                        'created_at': self.created_at.isoformat()
-                    }
+            from src.models import User, Interview
             
             app.User = User
             app.Interview = Interview
