@@ -15,6 +15,7 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import re
+from functools import wraps
 
 # Create Flask app
 app = Flask(__name__)
@@ -42,6 +43,14 @@ CORS(app, resources={
         "https://*.vercel.app"
     ]}
 }, supports_credentials=True)
+
+
+@app.after_request
+def ensure_cors_credentials(response):
+    """Guarantee CORS responses include the credentials flag for API routes."""
+    if request.path.startswith(('/api/', '/api_v1/', '/api')):
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+    return response
 
 # Initialize JWT
 jwt = JWTManager(app)
