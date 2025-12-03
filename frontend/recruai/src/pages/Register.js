@@ -9,7 +9,6 @@ const API_VERSION = "v1";
 
 export default function Register() {
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("individual");
@@ -73,26 +72,7 @@ export default function Register() {
     }
 
     try {
-      const apiUrl = `${API_BASE_URL}/api/${API_VERSION}/auth/register`;
-      console.log("🔥 CALLING API:", apiUrl);
-
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      console.log("✅ Response status:", response.status);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Registration failed");
-      }
-
-      const result = await response.json();
-      console.log("🎉 Registration successful:", result);
+      const result = await authAPI.register(email, password);
 
       // Store token and redirect
       if (result.access_token) {
@@ -101,7 +81,6 @@ export default function Register() {
         navigate("/dashboard");
       }
     } catch (error) {
-      console.error("❌ Registration error:", error);
       setError(error.message || "Registration failed");
     } finally {
       setLoading(false);
@@ -200,11 +179,6 @@ export default function Register() {
             >
               {loading ? "Creating account..." : "Create account"}
             </button>
-          </div>
-
-          {/* Debug info */}
-          <div className="text-xs text-gray-500 text-center bg-yellow-100 p-2 rounded">
-            🔥 API: {API_BASE_URL}/api/{API_VERSION}/auth/register
           </div>
         </form>
       </div>
