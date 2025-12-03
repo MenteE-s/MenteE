@@ -409,7 +409,9 @@ blueprint_error = None
 blueprint_registered = False
 try:
     from src.blueprints.recruai.routes.api import api_bp
+    # Register under both /api and /api/v1 to support existing frontend calls
     app.register_blueprint(api_bp, url_prefix="/api")
+    app.register_blueprint(api_bp, url_prefix="/api/v1")
     print("✅ RecruAI API blueprint registered")
     blueprint_registered = True
 except Exception as e:
