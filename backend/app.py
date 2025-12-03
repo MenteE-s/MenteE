@@ -25,7 +25,14 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
 app.config['JWT_TOKEN_LOCATION'] = ['headers']
 app.config['JWT_HEADER_NAME'] = 'Authorization'
 app.config['JWT_HEADER_TYPE'] = 'Bearer'
-CORS(app)
+
+# Configure CORS to allow the Vercel frontend
+CORS(app, resources={r"/api/*": {"origins": [
+    "http://localhost:3000",
+    "http://localhost:3001", 
+    "https://recruai-nine.vercel.app",
+    "https://*.vercel.app"
+]}}, supports_credentials=True)
 
 # Initialize JWT
 jwt = JWTManager(app)
@@ -221,7 +228,8 @@ def get_interviews():
         return jsonify({"error": "Database not available"}), 500
     
     try:
-        current_user_id = get_jwt_identity()
+        # get_jwt_identity returns string, convert to int for DB query
+        current_user_id = int(get_jwt_identity())
         
         with app.app_context():
             interviews = app.Interview.query.filter_by(user_id=current_user_id).all()
@@ -239,7 +247,8 @@ def create_interview():
         return jsonify({"error": "Database not available"}), 500
     
     try:
-        current_user_id = get_jwt_identity()
+        # get_jwt_identity returns string, convert to int for DB
+        current_user_id = int(get_jwt_identity())
         data = request.get_json()
         
         if not data or not data.get('title'):
@@ -299,7 +308,8 @@ def test_db():
 @jwt_required()
 def chat():
     try:
-        current_user_id = get_jwt_identity()
+        # get_jwt_identity returns string, convert to int
+        current_user_id = int(get_jwt_identity())
         data = request.get_json() or {}
         message = data.get('message', 'Hello')
         
@@ -348,6 +358,15 @@ def debug_jwt_config():
         "jwt_algorithm": "HS256",
         "jwt_expires": str(app.config.get('JWT_ACCESS_TOKEN_EXPIRES'))
     })
+
+# Register the RecruAI API blueprint to get all the additional endpoints
+# The blueprint routes are under /api (without /v1)
+try:
+    from app.blueprints.recruai.routes.api import api_bp
+    app.register_blueprint(api_bp, url_prefix="/api")
+    print("✅ RecruAI API blueprint registered")
+except Exception as e:
+    print(f"⚠️ Could not register RecruAI blueprint: {e}")
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

@@ -6,7 +6,6 @@ import StatCard from "../../components/ui/StatCard";
 import Card from "../../components/ui/Card";
 import {
   getSidebarItems,
-  verifyTokenWithServer,
   API_ENDPOINTS,
   authAPI,
 } from "../../utils/auth";
@@ -47,68 +46,71 @@ export default function IndividualDashboard() {
 
   const fetchInterviews = async () => {
     try {
-      const user = await verifyTokenWithServer();
-      const userId = user && user.id ? user.id : 1; // Default to 1 if not authenticated
       const token = authAPI.getToken();
-
-      // Fetch interviews from the actual API
-      const interviewsResponse = await fetch(API_ENDPOINTS.INTERVIEWS.LIST, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      // Fetch applied jobs - using placeholder since endpoint may not exist yet
-      const appliedResponse = await fetch(
-        `${API_ENDPOINTS.BASE}/api/v1/applied-jobs/user/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      // Fetch saved jobs - using placeholder since endpoint may not exist yet
-      const savedResponse = await fetch(
-        `${API_ENDPOINTS.BASE}/api/v1/saved-jobs/user/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
       let interviewsData = [];
       let appliedData = [];
       let savedData = [];
 
-      if (interviewsResponse.ok) {
-        try {
+      // Fetch interviews from the actual API
+      try {
+        const interviewsResponse = await fetch(API_ENDPOINTS.INTERVIEWS.LIST, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (interviewsResponse.ok) {
           const data = await interviewsResponse.json();
           interviewsData = data.interviews || [];
-          setInterviews(interviewsData.slice(0, 5)); // Show only recent 5
-        } catch (e) {
-          console.log("Could not parse interviews response");
+          setInterviews(interviewsData.slice(0, 5));
         }
+      } catch (e) {
+        console.log("Could not fetch interviews:", e.message);
       }
 
-      if (appliedResponse.ok) {
-        try {
+      // Fetch applied jobs - endpoint is under /api (not /api/v1)
+      try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const userId = user.id || 1;
+        const appliedResponse = await fetch(
+          `${API_ENDPOINTS.BASE}/api/applied-jobs/user/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (appliedResponse.ok) {
           appliedData = await appliedResponse.json();
-        } catch (e) {
-          console.log("Could not parse applied jobs response");
         }
+      } catch (e) {
+        console.log("Could not fetch applied jobs:", e.message);
       }
 
-      if (savedResponse.ok) {
-        try {
+      // Fetch saved jobs - endpoint is under /api (not /api/v1)
+      try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const userId = user.id || 1;
+        const savedResponse = await fetch(
+          `${API_ENDPOINTS.BASE}/api/saved-jobs/user/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (savedResponse.ok) {
           savedData = await savedResponse.json();
-        } catch (e) {
-          console.log("Could not parse saved jobs response");
         }
+      } catch (e) {
+        console.log("Could not fetch saved jobs:", e.message);
       }
 
       // Calculate stats from real data
