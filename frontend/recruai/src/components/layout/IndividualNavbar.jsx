@@ -7,20 +7,12 @@ export default function IndividualNavbar({ isAuthenticated }) {
     isAuthenticated || localStorage.getItem("isAuthenticated") === "true";
 
   function signOut() {
-    (async () => {
-      try {
-        await fetch("/api/auth/logout", {
-          method: "POST",
-          credentials: "include",
-        });
-      } catch (e) {
-        // ignore network errors
-      }
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("isAuthenticated");
-      localStorage.removeItem("authRole");
-      navigate("/signin", { replace: true });
-    })();
+    // JWT auth - just clear local storage, no backend call needed
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("token");
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("authRole");
+    navigate("/signin", { replace: true });
   }
 
   return (
